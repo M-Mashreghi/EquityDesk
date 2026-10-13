@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets / local configuration
+.env
+.env.*
+!.env.example
+
+# Local data (fixtures are versioned)
+data/raw/*
+data/cache/*
+data/backups/*
+data/*.db
+data/*.db-*
+!data/raw/.gitkeep
+!data/cache/.gitkeep
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
