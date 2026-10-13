@@ -9,6 +9,7 @@ from typing import Protocol
 from equitydesk.domain.companies import Company, Security
 from equitydesk.domain.documents import SourceDocument
 from equitydesk.domain.financials import FinancialFact
+from equitydesk.domain.normalized import NormalizedDocument
 from equitydesk.domain.research import ResearchFinding, ResearchRun
 from equitydesk.domain.valuation import ValuationRun
 
@@ -62,3 +63,8 @@ class FinancialFactRepository(Protocol):
 class ValuationRepository(Protocol):
     def add_valuation(self, valuation: ValuationRun) -> None: ...
     def valuations_for_run(self, research_run_id: str) -> list[ValuationRun]: ...
+
+
+class NormalizedDocumentRepository(Protocol):
+    def add_normalized(self, doc: NormalizedDocument) -> None: ...
+    def get_normalized(self, document_id: str) -> NormalizedDocument: ...

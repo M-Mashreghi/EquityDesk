@@ -296,3 +296,11 @@ This section records the concrete contracts as tasks are implemented. It is upda
 - Unapproved URLs are rejected by default; with `allow_unapproved=True` they are stored as `secondary`, so they can never pose as primary sources.
 - Matching patterns supply the document type; a `published_at` earlier than the date encoded in the URL is rejected as inconsistent.
 - `document_id = ir_<sha256(url)[:16]>_<content-hash[:12]>`: the same URL with changed content becomes a new document (versioning is handled by Task 2.4).
+
+### Document parsing and normalized model (Task 2.3)
+
+`domain/normalized.NormalizedDocument` = ordered `Section`s (heading, level, SEC `item_code` such as `1A`/`7`), `Chunk`s (text, section, ordinal, optional page, character offsets into `plain_text`) and `Table`s (cell rows + the chunk that cites them). Chunk ids `<document_id>:s<section>:p<paragraph>` are the evidence locators used by research findings and are deterministic for a given content + parser version (verified by tests).
+
+Parsers (`infrastructure/parsers/`, standard library only): `HtmlDocumentParser` (block tags, `<h1-6>` and SEC `PART`/`Item N.` headings, tables, skips script/style/comments, entity decoding, UTF-8 with cp1252 fallback), `PlainTextParser`, `PagedTextParser` (form-feed page breaks → page locators), `PdfParser` (delegates text extraction to an injected adapter; with none configured a PDF fails with `unsupported_format`). `ParserRegistry` dispatches by MIME type or content sniffing. Paragraphs longer than 2,000 characters are split at sentence boundaries. Every failure is a structured `ParseError(document_id, code)` (`empty_content`, `binary_content`, `decode_error`, `malformed`, `no_text`, `unsupported_format`), never a partial document.
+
+Parsed output is stored in `normalized_documents` keyed by (document, parser name, parser version) — schema v2, applied additively to v1 databases; re-parsing with the same parser must reproduce identical output.

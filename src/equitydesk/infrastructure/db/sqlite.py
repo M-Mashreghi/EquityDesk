@@ -20,10 +20,11 @@ from equitydesk.application.ports import ImmutableRecordError, NotFoundError
 from equitydesk.domain.companies import Company, Security
 from equitydesk.domain.documents import SourceDocument
 from equitydesk.domain.financials import FinancialFact
+from equitydesk.domain.normalized import NormalizedDocument
 from equitydesk.domain.research import ResearchFinding, ResearchRun
 from equitydesk.domain.valuation import ValuationRun
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 M = TypeVar("M", bound=BaseModel)
 
@@ -99,6 +100,15 @@ CREATE TABLE IF NOT EXISTS valuation_runs (
     payload TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS ix_valuations_run ON valuation_runs(research_run_id);
+
+-- v2: parsed documents, keyed by (document, parser version) so re-parses never overwrite.
+CREATE TABLE IF NOT EXISTS normalized_documents (
+    document_id TEXT NOT NULL REFERENCES source_documents(document_id),
+    parser_name TEXT NOT NULL,
+    parser_version TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    PRIMARY KEY (document_id, parser_name, parser_version)
+);
 """
 
 
@@ -130,6 +140,12 @@ class Database:
             )
         elif existing > SCHEMA_VERSION:
             raise RuntimeError(f"database schema {existing} is newer than code ({SCHEMA_VERSION})")
+        elif existing < SCHEMA_VERSION:
+            # Schema changes are additive (CREATE ... IF NOT EXISTS), applied above.
+            self.conn.execute(
+                "UPDATE schema_meta SET value = ? WHERE key = 'schema_version'",
+                (str(SCHEMA_VERSION),),
+            )
 
     def schema_version(self) -> int | None:
         try:
@@ -423,6 +439,40 @@ class SqliteValuationRepository:
         return [ValuationRun.model_validate_json(r["payload"]) for r in rows]
 
 
+class SqliteNormalizedDocumentRepository:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def add_normalized(self, doc: NormalizedDocument) -> None:
+        row = self.db.conn.execute(
+            "SELECT payload FROM normalized_documents WHERE document_id = ? AND parser_name = ? "
+            "AND parser_version = ?",
+            (doc.document_id, doc.parser_name, doc.parser_version),
+        ).fetchone()
+        payload = doc.model_dump_json()
+        if row is not None:
+            if row["payload"] != payload:
+                raise ImmutableRecordError(
+                    f"{doc.document_id} parsed by {doc.parser_name} {doc.parser_version} "
+                    "already stored with different output (parser is not deterministic?)"
+                )
+            return
+        self.db.conn.execute(
+            "INSERT INTO normalized_documents(document_id, parser_name, parser_version, payload) "
+            "VALUES (?, ?, ?, ?)",
+            (doc.document_id, doc.parser_name, doc.parser_version, payload),
+        )
+
+    def get_normalized(self, document_id: str) -> NormalizedDocument:
+        """Latest parse of a document (highest parser version, lexicographic)."""
+        row = self.db.conn.execute(
+            "SELECT payload FROM normalized_documents WHERE document_id = ? "
+            "ORDER BY parser_version DESC, parser_name LIMIT 1",
+            (document_id,),
+        ).fetchone()
+        return _load(NormalizedDocument, row, f"normalized document {document_id}")
+
+
 class Repositories:
     """Convenience bundle of all SQLite repositories sharing one connection."""
 
@@ -434,6 +484,7 @@ class Repositories:
         self.findings = SqliteFindingRepository(db)
         self.facts = SqliteFinancialFactRepository(db)
         self.valuations = SqliteValuationRepository(db)
+        self.normalized = SqliteNormalizedDocumentRepository(db)
 
 
 def open_database(path: Path | str = ":memory:") -> Repositories:

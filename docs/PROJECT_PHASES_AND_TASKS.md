@@ -188,7 +188,7 @@ Collect official earnings releases and investor materials through configurable i
 
 ### Task 2.3: Document Parser & Normalized Document Model
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Parse supported HTML/text/PDF-like inputs behind adapters into sections/chunks with source locators.
@@ -202,10 +202,10 @@ Parse supported HTML/text/PDF-like inputs behind adapters into sections/chunks w
 
 **Definition of Done (DoD)**
 
-- [ ] Fixture documents produce stable normalized sections; malformed input fails structurally.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Fixture documents produce stable normalized sections; malformed input fails structurally.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -855,13 +855,13 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | Phase | Tasks | Completed |
 |---|---:|---:|
 | 1 — Foundation, Research Runs & Security Master | 5 | 5 |
-| 2 — Primary-Source Collection & Document Pipeline | 5 | 2 |
+| 2 — Primary-Source Collection & Document Pipeline | 5 | 3 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 0 |
 | 4 — LLM Research Intelligence | 5 | 0 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **7** |
+| **Total** | **35** | **8** |
 
 ## Change Log
 
@@ -875,3 +875,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 1.5 completed and verified |
 | 2026-10-13 | Task 2.1 completed and verified |
 | 2026-10-13 | Task 2.2 completed and verified |
+| 2026-10-13 | Task 2.3 completed and verified |
