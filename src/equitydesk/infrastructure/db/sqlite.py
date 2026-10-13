@@ -22,9 +22,10 @@ from equitydesk.domain.documents import SourceDocument
 from equitydesk.domain.financials import FinancialFact
 from equitydesk.domain.normalized import NormalizedDocument
 from equitydesk.domain.research import ResearchFinding, ResearchRun
+from equitydesk.domain.snapshot import ResearchSnapshot
 from equitydesk.domain.valuation import ValuationRun
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 M = TypeVar("M", bound=BaseModel)
 
@@ -108,6 +109,22 @@ CREATE TABLE IF NOT EXISTS normalized_documents (
     parser_version TEXT NOT NULL,
     payload TEXT NOT NULL,
     PRIMARY KEY (document_id, parser_name, parser_version)
+);
+
+-- v3: point-in-time snapshot per research run. snapshot_id is content-derived, so two runs
+-- over identical inputs share the same snapshot_id.
+CREATE TABLE IF NOT EXISTS research_snapshots (
+    research_run_id TEXT PRIMARY KEY REFERENCES research_runs(research_run_id),
+    snapshot_id TEXT NOT NULL,
+    as_of TEXT NOT NULL,
+    payload TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_snapshots_id ON research_snapshots(snapshot_id);
+CREATE TABLE IF NOT EXISTS snapshot_documents (
+    research_run_id TEXT NOT NULL REFERENCES research_snapshots(research_run_id),
+    ordinal INTEGER NOT NULL,
+    document_id TEXT NOT NULL REFERENCES source_documents(document_id),
+    PRIMARY KEY (research_run_id, ordinal)
 );
 """
 
@@ -482,6 +499,58 @@ class SqliteNormalizedDocumentRepository:
         return _load(NormalizedDocument, row, f"normalized document {document_id}")
 
 
+class SqliteSnapshotRepository:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def add_snapshot(self, snapshot: ResearchSnapshot) -> None:
+        with self.db.transaction():
+            _insert_immutable(
+                self.db,
+                "research_snapshots",
+                "research_run_id",
+                {
+                    "research_run_id": snapshot.research_run_id,
+                    "snapshot_id": snapshot.snapshot_id,
+                    "as_of": ts(snapshot.as_of),
+                    "payload": snapshot.model_dump_json(),
+                },
+                "snapshot for run",
+            )
+            exists = self.db.conn.execute(
+                "SELECT 1 FROM snapshot_documents WHERE research_run_id = ? LIMIT 1",
+                (snapshot.research_run_id,),
+            ).fetchone()
+            if exists is None:
+                self.db.conn.executemany(
+                    "INSERT INTO snapshot_documents(research_run_id, ordinal, document_id) "
+                    "VALUES (?, ?, ?)",
+                    [
+                        (snapshot.research_run_id, i, doc_id)
+                        for i, doc_id in enumerate(snapshot.document_ids)
+                    ],
+                )
+
+    def get_snapshot(self, snapshot_id: str) -> ResearchSnapshot:
+        row = self.db.conn.execute(
+            "SELECT payload FROM research_snapshots WHERE snapshot_id = ? LIMIT 1", (snapshot_id,)
+        ).fetchone()
+        return _load(ResearchSnapshot, row, f"snapshot {snapshot_id}")
+
+    def snapshot_for_run(self, research_run_id: str) -> ResearchSnapshot | None:
+        row = self.db.conn.execute(
+            "SELECT payload FROM research_snapshots WHERE research_run_id = ?", (research_run_id,)
+        ).fetchone()
+        return ResearchSnapshot.model_validate_json(row["payload"]) if row else None
+
+    def member_ids(self, research_run_id: str) -> list[str]:
+        rows = self.db.conn.execute(
+            "SELECT document_id FROM snapshot_documents WHERE research_run_id = ? ORDER BY ordinal",
+            (research_run_id,),
+        )
+        return [r["document_id"] for r in rows]
+
+
 class Repositories:
     """Convenience bundle of all SQLite repositories sharing one connection."""
 
@@ -494,6 +563,7 @@ class Repositories:
         self.facts = SqliteFinancialFactRepository(db)
         self.valuations = SqliteValuationRepository(db)
         self.normalized = SqliteNormalizedDocumentRepository(db)
+        self.snapshots = SqliteSnapshotRepository(db)
 
 
 def open_database(path: Path | str = ":memory:") -> Repositories:

@@ -40,16 +40,16 @@ Update after every verified task.
 - [x] **Task 2.2** — Issuer Investor-Relations Adapter
 - [x] **Task 2.3** — Document Parser & Normalized Document Model
 - [x] **Task 2.4** — Document Hashing, Deduplication & Amendment/Version Links
-- [ ] **Task 2.5** — Point-in-Time Research Snapshot Builder
+- [x] **Task 2.5** — Point-in-Time Research Snapshot Builder
 
 ### Verification — Phase 2
 
 | Item | Detail |
 |---|---|
-| Status | In Progress (4/5) |
-| Tests | — |
-| Docs | — |
-| Notes | — |
+| Status | Completed |
+| Tests | `pytest`: 163 passed; SEC/IR HTTP served by httpx.MockTransport fixtures |
+| Docs | ARCHITECTURE.md contracts 2.1–2.5 |
+| Notes | SEC acceptance time interpreted conservatively (New York wall-clock, not before filing date) |
 
 ## Phase 3 — Financial Statements & Deterministic Analytics
 
@@ -157,3 +157,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 2.3** (2026-10-13): Normalized document model + HTML/text/paged-text/PDF-adapter parsers with stable chunk locators, structured ParseError; normalized_documents table (schema v2, additive migration). 147 tests passed; ruff + mypy clean.
 
 - **Task 2.4** (2026-10-13): Ingestion service: hash verification, content dedupe (keeping earlier publications), immutable accessions, URL-based version chains, amendment links; content-addressed filesystem raw store. 157 tests passed; ruff + mypy clean.
+
+- **Task 2.5** (2026-10-13): Snapshot builder: as_of filter, newest-visible version, hash dedupe to earliest publication, deterministic content-derived snapshot id, persisted immutable membership (schema v3). 163 tests passed; ruff + mypy clean.

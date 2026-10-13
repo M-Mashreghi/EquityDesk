@@ -316,3 +316,14 @@ Parsed output is stored in `normalized_documents` keyed by (document, parser nam
 5. `X/A` forms → `amendment`, linked by `amends_document_id` to the latest original `X` for the same `period_end` published before it (or flagged when none is stored).
 
 Nothing is overwritten: every version stays queryable (`version_chain()`). Raw bytes go to `infrastructure/db/raw_store.FilesystemRawStore` — content-addressed (`<root>/<hash[:2]>/<hash>`), atomic writes, hash verified on every read; `SourceDocument.raw_ref` holds the hash.
+
+### Point-in-time research snapshot (Task 2.5)
+
+`application/snapshot.SnapshotBuilder.build(run)` selects the exact document set a run may use (`domain/snapshot.select_snapshot_documents`):
+
+1. documents with `published_at <= as_of` only;
+2. within a version chain, only the newest version already visible at `as_of` (a later correction never leaks backwards; the old version is kept for the earlier date);
+3. byte-identical documents collapse to the earliest publication;
+4. amendments and originals are both members (distinct filings).
+
+Members are ordered by `(published_at, document_id)`. Excluded ids are recorded by reason (`future`, `superseded`, `duplicate`). `snapshot_id = snap_<sha256(company, as_of, builder version, sorted members)>`, so frozen inputs always produce the same id and member list, independent of input order. Membership is persisted (`research_snapshots`, `snapshot_documents`; schema v3) and immutable: rebuilding a run returns the stored snapshot even after newer documents arrive.

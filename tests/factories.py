@@ -75,7 +75,7 @@ def document(**kw: Any) -> SourceDocument:
         "source_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019323000106/aapl-20230930.htm",
         "official_id": "0000320193-23-000106",
         "published_at": dt(2023, 11, 3, 10, 4),
-        "retrieved_at": dt(2024, 6, 1, 9),
+        "retrieved_at": dt(2026, 10, 1, 9),
         "period_end": date(2023, 9, 30),
         "content_hash": HASH,
     }
