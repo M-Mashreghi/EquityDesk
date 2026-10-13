@@ -33,3 +33,19 @@ class ValuationRun(DomainModel):
         if self.outputs and not self.inputs:
             raise ValueError("valuation outputs require traceable inputs")
         return self
+
+
+class Assumption(DomainModel):
+    """An explicit valuation/scenario input chosen by a person or a documented rule."""
+
+    name: str = Field(min_length=1)
+    value: float
+    unit: str = Field(min_length=1, description="ratio | USD | x | years ...")
+    rationale: str = Field(min_length=1)
+    source: str = Field(min_length=1, description="user:<id> | rule:<name> | scenario:<name>")
+
+    @model_validator(mode="after")
+    def _not_model_generated(self) -> Assumption:
+        if not self.source.startswith(("user:", "rule:", "scenario:")):
+            raise ValueError("assumption source must be user:, rule: or scenario: (never a model)")
+        return self

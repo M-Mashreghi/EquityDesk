@@ -257,7 +257,7 @@ Build the exact document set visible to a ResearchRun and persist snapshot membe
 
 ## Phase 3: Financial Statements & Deterministic Analytics
 
-**Status:** `[-]` In Progress
+**Status:** `[x]` Completed
 
 ### Task 3.1: Standardized Financial Fact Model & Statement Mapper
 
@@ -353,7 +353,7 @@ Represent explicit versioned peer sets and calculate comparable operating/valuat
 
 ### Task 3.5: Valuation Primitives & Market Snapshot Contract
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Implement market snapshot inputs and reusable EV/equity bridge, multiple, discounting and sensitivity primitives.
@@ -367,10 +367,10 @@ Implement market snapshot inputs and reusable EV/equity bridge, multiple, discou
 
 **Definition of Done (DoD)**
 
-- [ ] Valuation primitives pass hand-worked tests; observation date and assumptions required.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Valuation primitives pass hand-worked tests; observation date and assumptions required.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -856,12 +856,12 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 |---|---:|---:|
 | 1 — Foundation, Research Runs & Security Master | 5 | 5 |
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 5 |
-| 3 — Financial Statements & Deterministic Analytics | 5 | 4 |
+| 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
 | 4 — LLM Research Intelligence | 5 | 0 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **14** |
+| **Total** | **35** | **15** |
 
 ## Change Log
 
@@ -882,3 +882,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 3.2 completed and verified |
 | 2026-10-13 | Task 3.3 completed and verified |
 | 2026-10-13 | Task 3.4 completed and verified |
+| 2026-10-13 | Task 3.5 completed and verified |

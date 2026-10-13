@@ -57,16 +57,16 @@ Update after every verified task.
 - [x] **Task 3.2** — Historical KPI & Ratio Engine
 - [x] **Task 3.3** — Trend, Change & Quality-of-Earnings Diagnostics
 - [x] **Task 3.4** — Peer Set & Comparable Metrics Foundation
-- [ ] **Task 3.5** — Valuation Primitives & Market Snapshot Contract
+- [x] **Task 3.5** — Valuation Primitives & Market Snapshot Contract
 
 ### Verification — Phase 3
 
 | Item | Detail |
 |---|---|
-| Status | In Progress (4/5) |
-| Tests | — |
-| Docs | — |
-| Notes | — |
+| Status | Completed |
+| Tests | `pytest`: 232 passed; KPI fixtures hand-checked against Apple FY2021–FY2023 10-K figures |
+| Docs | ARCHITECTURE.md contracts 3.1–3.5 |
+| Notes | No pandas/numpy needed: analytics use the standard library only |
 
 ## Phase 4 — LLM Research Intelligence
 
@@ -167,3 +167,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 3.3** (2026-10-13): Trend summaries, margin deltas (bps) and 8 quality-of-earnings diagnostics exposing formula/components/threshold; verified on Apple fixture and constructed red-flag case. 217 tests passed; ruff + mypy clean.
 
 - **Task 3.4** (2026-10-13): Explicit versioned PeerSet (no model-selected peers), insert-only peer_sets table (schema v4) with point-in-time version lookup, comparable table + peer-only summary statistics with explicit missing exclusions. 223 tests passed; ruff + mypy clean.
+
+- **Task 3.5** (2026-10-13): Market observation contract with point-in-time lookup, explicit Assumption model, traceable valuation primitives (EV bridge, multiples, discounting, terminal values, sensitivity grid) verified by hand-worked tests. 232 tests passed; ruff + mypy clean.
