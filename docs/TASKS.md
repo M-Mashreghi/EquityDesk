@@ -70,7 +70,7 @@ Update after every verified task.
 
 ## Phase 4 — LLM Research Intelligence
 
-- [ ] **Task 4.1** — Structured LLM Provider & Schema Validation
+- [x] **Task 4.1** — Structured LLM Provider & Schema Validation
 - [ ] **Task 4.2** — Business Model & Segment Evidence Extractor
 - [ ] **Task 4.3** — Guidance, Strategy & Management-Language Change Analyzer
 - [ ] **Task 4.4** — Risk, Catalyst & Open-Question Extractor
@@ -80,7 +80,7 @@ Update after every verified task.
 
 | Item | Detail |
 |---|---|
-| Status | Not Started |
+| Status | In Progress (1/5) |
 | Tests | — |
 | Docs | — |
 | Notes | — |
@@ -169,3 +169,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 3.4** (2026-10-13): Explicit versioned PeerSet (no model-selected peers), insert-only peer_sets table (schema v4) with point-in-time version lookup, comparable table + peer-only summary statistics with explicit missing exclusions. 223 tests passed; ruff + mypy clean.
 
 - **Task 3.5** (2026-10-13): Market observation contract with point-in-time lookup, explicit Assumption model, traceable valuation primitives (EV bridge, multiples, discounting, terminal values, sensitivity grid) verified by hand-worked tests. 232 tests passed; ruff + mypy clean.
+
+- **Task 4.1** (2026-10-13): LLM provider port, versioned prompts, StructuredLLMClient (JSON + schema validation, bounded retries, structured failures), scripted fake provider, Anthropic SDK adapter (optional extra) with mocked error mapping. 254 tests passed; ruff + mypy clean.

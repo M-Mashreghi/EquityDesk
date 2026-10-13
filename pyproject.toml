@@ -16,6 +16,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+llm = [
+    "anthropic>=1.13,<2",
+]
 dev = [
     "pytest>=8",
     "ruff>=0.6",
@@ -50,13 +53,14 @@ ignore = ["S101"]
 known-first-party = ["equitydesk", "factories"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S", "DTZ"]
+"tests/**" = ["S", "DTZ", "E501"]
 # Concept/tag mapping table is kept one concept per line for readability.
 "src/equitydesk/analytics/accounting.py" = ["E501"]
 "src/equitydesk/analytics/kpis.py" = ["E501"]
 "src/equitydesk/analytics/diagnostics.py" = ["E501"]
 "src/equitydesk/analytics/peers.py" = ["E501"]
 "src/equitydesk/analytics/valuation.py" = ["E501"]
+"src/equitydesk/application/llm.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"
