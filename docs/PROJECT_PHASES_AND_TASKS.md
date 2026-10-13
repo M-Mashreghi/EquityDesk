@@ -69,7 +69,7 @@ Implement typed settings, environment loading, secret-safe logging, correlation/
 
 ### Task 1.3: Core Domain Models & SQLite Persistence
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Create Company, Security, ResearchRun, SourceDocument, ResearchFinding, FinancialFact, ValuationRun and supporting persistence contracts/schema.
@@ -83,10 +83,10 @@ Create Company, Security, ResearchRun, SourceDocument, ResearchFinding, Financia
 
 **Definition of Done (DoD)**
 
-- [ ] Fresh DB initializes; round-trip integration tests pass; timestamps are timezone-aware.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Fresh DB initializes; round-trip integration tests pass; timestamps are timezone-aware.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -854,14 +854,14 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 
 | Phase | Tasks | Completed |
 |---|---:|---:|
-| 1 — Foundation, Research Runs & Security Master | 5 | 2 |
+| 1 — Foundation, Research Runs & Security Master | 5 | 3 |
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 0 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 0 |
 | 4 — LLM Research Intelligence | 5 | 0 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **2** |
+| **Total** | **35** | **3** |
 
 ## Change Log
 
@@ -870,3 +870,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Initial EquityDesk planning baseline: 7 phases / 35 atomic tasks |
 | 2026-10-13 | Task 1.1 completed and verified |
 | 2026-10-13 | Task 1.2 completed and verified |
+| 2026-10-13 | Task 1.3 completed and verified |

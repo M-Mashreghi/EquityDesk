@@ -21,7 +21,7 @@ Update after every verified task.
 
 - [x] **Task 1.1** — Python Project Scaffold & Architecture Guardrails
 - [x] **Task 1.2** — Configuration, Secrets & Structured Logging
-- [ ] **Task 1.3** — Core Domain Models & SQLite Persistence
+- [x] **Task 1.3** — Core Domain Models & SQLite Persistence
 - [ ] **Task 1.4** — Company / Security Resolver
 - [ ] **Task 1.5** — Point-in-Time Source Provenance Contract
 
@@ -29,7 +29,7 @@ Update after every verified task.
 
 | Item | Detail |
 |---|---|
-| Status | In Progress (2/5) |
+| Status | In Progress (3/5) |
 | Tests | — |
 | Docs | — |
 | Notes | — |
@@ -143,3 +143,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 1.1** (2026-10-13): Package scaffold (src layout, pyproject, dev tools), .env.example, layer import guardrail test. `pytest`: 16 passed; ruff + mypy strict clean.
 
 - **Task 1.2** (2026-10-13): Typed settings (`config.py`) with fail-fast `ConfigError`, SecretStr secrets, JSON/text logging with secret scrubbing and correlation/run context (`logging_setup.py`). 35 tests passed; ruff + mypy clean.
+
+- **Task 1.3** (2026-10-13): Domain models (Company, Security, ResearchRun lifecycle, SourceDocument, ResearchFinding, FinancialFact, ValuationRun) with tz-aware UTC timestamps; SQLite repositories with immutable inserts and point-in-time queries. 59 tests passed; ruff + mypy clean.

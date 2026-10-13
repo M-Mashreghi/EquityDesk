@@ -246,3 +246,24 @@ Primary screens:
 6. UI is thin.
 7. Research runs are reproducible.
 8. No autonomous trading in v1.
+
+## Implementation Contracts
+
+This section records the concrete contracts as tasks are implemented. It is updated in the same change set as the code.
+
+### Package layout and dependency rules (Task 1.1)
+
+`src/equitydesk/{domain,application,infrastructure,analytics,reporting,api,dashboard}`. Import direction is enforced by `tests/unit/test_architecture.py`: `domain` imports only the standard library and pydantic; `analytics` only `domain`; `application`/`reporting` never import infrastructure, HTTP, SQLite or LLM SDKs; `api` never imports `analytics`, SQLite or the dashboard; the dashboard never imports analytics, application, infrastructure or SQLite (it calls the API).
+
+### Configuration and logging (Task 1.2)
+
+`equitydesk.config.Settings` (typed, frozen) is the only place environment variables are read. `equitydesk.logging_setup` provides JSON/text logging with secret scrubbing and `correlation_id` / `research_run_id` context. Keys are listed in `docs/DEPLOYMENT.md`.
+
+### Domain model and persistence (Task 1.3)
+
+- All domain objects are frozen pydantic models (`domain/common.DomainModel`). Every timestamp is timezone-aware (`UtcDateTime`); naive datetimes are rejected and aware values are normalized to UTC.
+- `ResearchRun` enforces `as_of <= created_at` and the lifecycle in `docs/DIAGRAMS.md` §3 (`ALLOWED_TRANSITIONS`); any non-terminal state may additionally move to `Failed`. Transitions return a new object and append to `status_history`.
+- `ResearchFinding` carries `claim_type` (fact / inference / assumption / unknown) and `support_status`; a supported fact or inference must have at least one `EvidenceSpan`, and an unknown claim can never be supported.
+- `FinancialFact` records issuer, concept, period, unit, source document/accession, locator, origin (reported / derived / normalized / adjusted) and `available_at` (point-in-time gate). Non-reported facts must list `derived_from`.
+- `ValuationRun` persists method, formula, inputs, assumptions, outputs and version together; outputs without inputs are rejected.
+- SQLite (`infrastructure/db/sqlite.py`): each table has indexed query columns plus the full validated object as JSON `payload` (lossless round-trip). Indexed timestamps are fixed-precision UTC text, so text comparison equals time comparison. Foreign keys are enforced; schema version is stored in `schema_meta`. Source documents, findings, facts and valuations are insert-only: re-inserting identical content is a no-op, different content under the same id raises `ImmutableRecordError`. Research runs may change status, but not identity fields, and never after reaching a terminal status.
