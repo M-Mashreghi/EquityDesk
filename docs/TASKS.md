@@ -30,9 +30,9 @@ Update after every verified task.
 | Item | Detail |
 |---|---|
 | Status | Completed |
-| Tests | — |
-| Docs | — |
-| Notes | — |
+| Tests | `pytest`: 99 passed (unit + SQLite integration); ruff, mypy --strict clean |
+| Docs | ARCHITECTURE.md Implementation Contracts 1.1–1.5; DEPLOYMENT.md env keys; README dev setup |
+| Notes | Python 3.14 venv used locally (project requires >=3.12) |
 
 ## Phase 2 — Primary-Source Collection & Document Pipeline
 
