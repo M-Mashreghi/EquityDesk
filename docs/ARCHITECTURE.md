@@ -339,3 +339,13 @@ Members are ordered by `(published_at, document_id)`. Excluded ids are recorded 
   - fact ids are deterministic; `GrossProfit` is derived (`origin=derived`, `derived_from`) only when not reported;
   - `fiscal_year` for annual facts is the calendar year of the period end (approximation for non-calendar fiscal years).
 - `annual_statements(facts, currency)` gives a fiscal-year view (FY durations plus balance-sheet instants at the FY end) without mixing currencies.
+
+### KPI and ratio engine (Task 3.2)
+
+`analytics/kpis.py` declares every metric as `MetricDef(name, unit, formula, inputs, fn)` and evaluates it per fiscal year against the prior fiscal year (330–380 days earlier). Results are `domain.metrics.MetricResult` with a stable `metric_id` (`m:<company>:<name>:<period_end>`), formula text, input values, input fact ids, `calc_version` and a status:
+
+- `ok` — value computed;
+- `missing_input` — a required input fact is absent (named in `missing`); nothing is imputed;
+- `undefined` — inputs exist but the formula is meaningless (division by zero, growth from a non-positive base, CAGR with non-positive endpoints).
+
+Metrics: revenue / diluted-EPS / FCF growth, gross / operating / net / FCF margins, EBITDA (= operating income + D&A), FCF (= OCF − capex), effective tax rate, total debt (= long-term + current debt + commercial paper), net debt (− cash − short-term investments), net debt / EBITDA, debt / equity, current and quick ratios, interest coverage, ROE and ROA (on average balances), ROIC (= operating income × (1 − effective tax rate) / average invested capital, invested capital = equity + total debt − cash − short-term investments), diluted-share and shares-outstanding change, DSO / DIO / DPO / cash-conversion cycle (365-day basis), cash conversion (OCF / net income), revenue CAGR. Optional debt/cash components that a filer does not report count as zero and are listed in `missing` with a note.

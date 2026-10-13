@@ -54,7 +54,7 @@ Update after every verified task.
 ## Phase 3 — Financial Statements & Deterministic Analytics
 
 - [x] **Task 3.1** — Standardized Financial Fact Model & Statement Mapper
-- [ ] **Task 3.2** — Historical KPI & Ratio Engine
+- [x] **Task 3.2** — Historical KPI & Ratio Engine
 - [ ] **Task 3.3** — Trend, Change & Quality-of-Earnings Diagnostics
 - [ ] **Task 3.4** — Peer Set & Comparable Metrics Foundation
 - [ ] **Task 3.5** — Valuation Primitives & Market Snapshot Contract
@@ -63,7 +63,7 @@ Update after every verified task.
 
 | Item | Detail |
 |---|---|
-| Status | In Progress (1/5) |
+| Status | In Progress (2/5) |
 | Tests | — |
 | Docs | — |
 | Notes | — |
@@ -161,3 +161,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 2.5** (2026-10-13): Snapshot builder: as_of filter, newest-visible version, hash dedupe to earliest publication, deterministic content-derived snapshot id, persisted immutable membership (schema v3). 163 tests passed; ruff + mypy clean.
 
 - **Task 3.1** (2026-10-13): XBRL company-facts parser + concept mapper (priority tags, FY/Q classification, unit checks, point-in-time restatements, conflicts as issues, derived gross profit) with Apple FY2021-2023 fixture. 175 tests passed; ruff + mypy clean.
+
+- **Task 3.2** (2026-10-13): KPI engine: 27 declared metrics + revenue CAGR with formula/input provenance and ok/missing_input/undefined status; Apple FY2023 values match hand calculations. 210 tests passed; ruff + mypy clean.
