@@ -21,11 +21,12 @@ from equitydesk.domain.companies import Company, Security
 from equitydesk.domain.documents import SourceDocument
 from equitydesk.domain.financials import FinancialFact
 from equitydesk.domain.normalized import NormalizedDocument
+from equitydesk.domain.peers import PeerSet
 from equitydesk.domain.research import ResearchFinding, ResearchRun
 from equitydesk.domain.snapshot import ResearchSnapshot
 from equitydesk.domain.valuation import ValuationRun
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 M = TypeVar("M", bound=BaseModel)
 
@@ -125,6 +126,16 @@ CREATE TABLE IF NOT EXISTS snapshot_documents (
     ordinal INTEGER NOT NULL,
     document_id TEXT NOT NULL REFERENCES source_documents(document_id),
     PRIMARY KEY (research_run_id, ordinal)
+);
+
+-- v4: explicit, versioned peer sets (insert-only).
+CREATE TABLE IF NOT EXISTS peer_sets (
+    name TEXT NOT NULL,
+    version INTEGER NOT NULL,
+    target_company_id TEXT NOT NULL REFERENCES companies(company_id),
+    effective_from TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    PRIMARY KEY (name, version)
 );
 """
 
@@ -551,6 +562,59 @@ class SqliteSnapshotRepository:
         return [r["document_id"] for r in rows]
 
 
+class SqlitePeerSetRepository:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def add_peer_set(self, peer_set: PeerSet) -> None:
+        latest = self.db.conn.execute(
+            "SELECT MAX(version) AS v FROM peer_sets WHERE name = ?", (peer_set.name,)
+        ).fetchone()["v"]
+        if latest is not None and peer_set.version != latest + 1:
+            if (
+                peer_set.version <= latest
+                and self.get_version(peer_set.name, peer_set.version) == peer_set
+            ):
+                return
+            raise ImmutableRecordError(
+                f"peer set {peer_set.name}: expected version {latest + 1}, got {peer_set.version}"
+            )
+        if latest is None and peer_set.version != 1:
+            raise ImmutableRecordError("the first peer set version must be 1")
+        self.db.conn.execute(
+            "INSERT INTO peer_sets(name, version, target_company_id, effective_from, payload) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (
+                peer_set.name,
+                peer_set.version,
+                peer_set.target_company_id,
+                ts(peer_set.effective_from),
+                peer_set.model_dump_json(),
+            ),
+        )
+
+    def get_version(self, name: str, version: int) -> PeerSet:
+        row = self.db.conn.execute(
+            "SELECT payload FROM peer_sets WHERE name = ? AND version = ?", (name, version)
+        ).fetchone()
+        return _load(PeerSet, row, f"peer set {name}:v{version}")
+
+    def effective_as_of(self, name: str, as_of: datetime) -> PeerSet | None:
+        """Latest version whose effective_from is at or before as_of."""
+        row = self.db.conn.execute(
+            "SELECT payload FROM peer_sets WHERE name = ? AND effective_from <= ? "
+            "ORDER BY version DESC LIMIT 1",
+            (name, ts(as_of)),
+        ).fetchone()
+        return PeerSet.model_validate_json(row["payload"]) if row else None
+
+    def history(self, name: str) -> list[PeerSet]:
+        rows = self.db.conn.execute(
+            "SELECT payload FROM peer_sets WHERE name = ? ORDER BY version", (name,)
+        )
+        return [PeerSet.model_validate_json(r["payload"]) for r in rows]
+
+
 class Repositories:
     """Convenience bundle of all SQLite repositories sharing one connection."""
 
@@ -564,6 +628,7 @@ class Repositories:
         self.valuations = SqliteValuationRepository(db)
         self.normalized = SqliteNormalizedDocumentRepository(db)
         self.snapshots = SqliteSnapshotRepository(db)
+        self.peer_sets = SqlitePeerSetRepository(db)
 
 
 def open_database(path: Path | str = ":memory:") -> Repositories:

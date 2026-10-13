@@ -330,7 +330,7 @@ Calculate multi-period trends, margin deltas, cash conversion, accrual/cash dive
 
 ### Task 3.4: Peer Set & Comparable Metrics Foundation
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Represent explicit versioned peer sets and calculate comparable operating/valuation metrics from available deterministic data.
@@ -344,10 +344,10 @@ Represent explicit versioned peer sets and calculate comparable operating/valuat
 
 **Definition of Done (DoD)**
 
-- [ ] Peer membership/date visible; no hidden model-selected peers in v1; metric fixtures pass.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Peer membership/date visible; no hidden model-selected peers in v1; metric fixtures pass.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -856,12 +856,12 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 |---|---:|---:|
 | 1 — Foundation, Research Runs & Security Master | 5 | 5 |
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 5 |
-| 3 — Financial Statements & Deterministic Analytics | 5 | 3 |
+| 3 — Financial Statements & Deterministic Analytics | 5 | 4 |
 | 4 — LLM Research Intelligence | 5 | 0 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **13** |
+| **Total** | **35** | **14** |
 
 ## Change Log
 
@@ -881,3 +881,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 3.1 completed and verified |
 | 2026-10-13 | Task 3.2 completed and verified |
 | 2026-10-13 | Task 3.3 completed and verified |
+| 2026-10-13 | Task 3.4 completed and verified |

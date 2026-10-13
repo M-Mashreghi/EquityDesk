@@ -370,3 +370,9 @@ Metrics: revenue / diluted-EPS / FCF growth, gross / operating / net / FCF margi
 | `operating_margin_compression` | Δ operating margin (bps) | < −200 bps |
 
 A triggered diagnostic is a prompt for investigation, not a conclusion.
+
+### Peer sets and comparable metrics (Task 3.4)
+
+- `domain/peers.PeerSet` is explicit and versioned: `name`, `version`, `target_company_id`, members with a written rationale, `selection_method` (`user_defined` / `rule_based`), `created_by`, `created_at`, `effective_from`. The target cannot be its own peer, members are unique, and a `created_by` starting with `llm`/`model`/`ai:` is rejected (no hidden model-selected peers in v1). Membership may be applied to historical dates (an analyst choice); peer *values* are always point-in-time.
+- SQLite `peer_sets` (schema v4) is insert-only: versions must be consecutive, an existing version cannot be rewritten, and `effective_as_of(name, as_of)` returns the latest version effective at that date.
+- `analytics/peers.py`: `comparable_table()` takes each company's latest fiscal-year `MetricResult`s (default: revenue growth, gross / operating / net / FCF margin, ROIC, net debt / EBITDA), keeps the period end and metric id per cell, computes `summary_stats()` over peers only (n, median, mean, min, max, p25, p75 with linear-interpolation percentiles), lists peers excluded for missing values, and notes peers whose fiscal period is more than 120 days from the target's.

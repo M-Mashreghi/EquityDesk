@@ -56,14 +56,14 @@ Update after every verified task.
 - [x] **Task 3.1** — Standardized Financial Fact Model & Statement Mapper
 - [x] **Task 3.2** — Historical KPI & Ratio Engine
 - [x] **Task 3.3** — Trend, Change & Quality-of-Earnings Diagnostics
-- [ ] **Task 3.4** — Peer Set & Comparable Metrics Foundation
+- [x] **Task 3.4** — Peer Set & Comparable Metrics Foundation
 - [ ] **Task 3.5** — Valuation Primitives & Market Snapshot Contract
 
 ### Verification — Phase 3
 
 | Item | Detail |
 |---|---|
-| Status | In Progress (3/5) |
+| Status | In Progress (4/5) |
 | Tests | — |
 | Docs | — |
 | Notes | — |
@@ -165,3 +165,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 3.2** (2026-10-13): KPI engine: 27 declared metrics + revenue CAGR with formula/input provenance and ok/missing_input/undefined status; Apple FY2023 values match hand calculations. 210 tests passed; ruff + mypy clean.
 
 - **Task 3.3** (2026-10-13): Trend summaries, margin deltas (bps) and 8 quality-of-earnings diagnostics exposing formula/components/threshold; verified on Apple fixture and constructed red-flag case. 217 tests passed; ruff + mypy clean.
+
+- **Task 3.4** (2026-10-13): Explicit versioned PeerSet (no model-selected peers), insert-only peer_sets table (schema v4) with point-in-time version lookup, comparable table + peer-only summary statistics with explicit missing exclusions. 223 tests passed; ruff + mypy clean.
