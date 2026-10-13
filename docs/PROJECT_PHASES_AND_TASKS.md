@@ -19,7 +19,7 @@ Before any task is marked `[x]`:
 
 ## Phase 1: Foundation, Research Runs & Security Master
 
-**Status:** `[-]` In Progress
+**Status:** `[x]` Completed
 
 ### Task 1.1: Python Project Scaffold & Architecture Guardrails
 
@@ -115,7 +115,7 @@ Resolve user ticker/company input to canonical issuer/security identifiers with 
 
 ### Task 1.5: Point-in-Time Source Provenance Contract
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Define source metadata, content hash, published/retrieved timestamps, `as_of` filtering and immutable snapshot rules.
@@ -129,10 +129,10 @@ Define source metadata, content hash, published/retrieved timestamps, `as_of` fi
 
 **Definition of Done (DoD)**
 
-- [ ] Future-source rejection tests pass; provenance is required for primary documents.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Future-source rejection tests pass; provenance is required for primary documents.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -854,14 +854,14 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 
 | Phase | Tasks | Completed |
 |---|---:|---:|
-| 1 — Foundation, Research Runs & Security Master | 5 | 4 |
+| 1 — Foundation, Research Runs & Security Master | 5 | 5 |
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 0 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 0 |
 | 4 — LLM Research Intelligence | 5 | 0 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **4** |
+| **Total** | **35** | **5** |
 
 ## Change Log
 
@@ -872,3 +872,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 1.2 completed and verified |
 | 2026-10-13 | Task 1.3 completed and verified |
 | 2026-10-13 | Task 1.4 completed and verified |
+| 2026-10-13 | Task 1.5 completed and verified |

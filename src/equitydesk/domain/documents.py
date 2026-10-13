@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date
 from enum import StrEnum
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from equitydesk.domain.common import DomainModel, UtcDateTime
 
@@ -17,6 +17,10 @@ class SourceType(StrEnum):
     MARKET_DATA = "market_data"
     SECONDARY = "secondary"
 
+
+PRIMARY_SOURCE_TYPES = frozenset(
+    {SourceType.REGULATORY_FILING, SourceType.ISSUER_IR, SourceType.ISSUER_PRESENTATION}
+)
 
 # Lower number = more authoritative. A lower-priority source must never silently override
 # a higher-priority one.
@@ -47,6 +51,23 @@ class SourceDocument(DomainModel):
     version: int = Field(default=1, ge=1)
     amends_document_id: str | None = None
     supersedes_document_id: str | None = None
+
+    @model_validator(mode="after")
+    def _provenance_contract(self) -> SourceDocument:
+        if self.retrieved_at < self.published_at:
+            raise ValueError("retrieved_at cannot precede published_at")
+        if self.is_primary:
+            if not (self.source_url or self.official_id):
+                raise ValueError("primary documents require source_url or official_id")
+            if self.content_hash is None:
+                raise ValueError("primary documents require a content_hash")
+        if self.version > 1 and self.supersedes_document_id is None:
+            raise ValueError("a document version > 1 must reference the version it supersedes")
+        return self
+
+    @property
+    def is_primary(self) -> bool:
+        return self.source_type in PRIMARY_SOURCE_TYPES
 
     @property
     def priority(self) -> int:

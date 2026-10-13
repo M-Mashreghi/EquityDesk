@@ -271,3 +271,11 @@ This section records the concrete contracts as tasks are implemented. It is upda
 ### Company / security resolution (Task 1.4)
 
 `application/resolver.SecurityResolver` resolves a query against a `SecurityMaster` port (v1 adapter: `infrastructure/sources/security_master.JsonSecurityMaster`, curated file `data/fixtures/security_master.json`, which can seed the SQLite company tables). Matching order: CIK → ISIN → ticker (optionally `TICKER:MIC` / `MIC:TICKER` or an `exchange` argument) → exact normalized name/alias → partial name. Results are structured (`resolved` / `ambiguous` / `not_found` / `invalid_input`) with candidates and suggestions. A ticker listed on several exchanges is always ambiguous without a MIC. Issuer-level matches pick the single flagged primary listing and record that choice in `notes`. Partial name matches are never auto-resolved.
+
+### Point-in-time provenance (Task 1.5)
+
+`domain/provenance.py` and the `SourceDocument` validator define the contract:
+
+1. **Visibility** — a document is visible to a run iff `published_at <= as_of` (inclusive). `retrieved_at` is audit metadata only. `split_as_of()` applies the same rule to any timestamped item (e.g. `FinancialFact.available_at`). A naive `as_of` is rejected. `assert_no_future_documents()` raises `FutureLeakageError` listing offending ids.
+2. **Required provenance** — primary documents (regulatory filing, issuer IR, issuer presentation) must have `source_url` or `official_id` and a SHA-256 `content_hash`; `retrieved_at >= published_at`; a `version > 1` must reference the document it supersedes.
+3. **Immutability** — stored documents are insert-only (Task 1.3) and `verify_content()` re-hashes raw bytes against the recorded hash.
