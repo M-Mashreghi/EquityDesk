@@ -138,11 +138,11 @@ Define source metadata, content hash, published/retrieved timestamps, `as_of` fi
 
 ## Phase 2: Primary-Source Collection & Document Pipeline
 
-**Status:** `[ ]` Not Started
+**Status:** `[-]` In Progress
 
 ### Task 2.1: Regulatory Filing Adapter
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Implement an official-regulator filing adapter for the initial US-equity scope with respectful headers/rate handling and test fixtures.
@@ -156,10 +156,10 @@ Implement an official-regulator filing adapter for the initial US-equity scope w
 
 **Definition of Done (DoD)**
 
-- [ ] Curated issuer filings enumerate by type/date; `as_of` filter enforced; HTTP mocked in CI.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Curated issuer filings enumerate by type/date; `as_of` filter enforced; HTTP mocked in CI.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -855,13 +855,13 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | Phase | Tasks | Completed |
 |---|---:|---:|
 | 1 — Foundation, Research Runs & Security Master | 5 | 5 |
-| 2 — Primary-Source Collection & Document Pipeline | 5 | 0 |
+| 2 — Primary-Source Collection & Document Pipeline | 5 | 1 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 0 |
 | 4 — LLM Research Intelligence | 5 | 0 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **5** |
+| **Total** | **35** | **6** |
 
 ## Change Log
 
@@ -873,3 +873,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 1.3 completed and verified |
 | 2026-10-13 | Task 1.4 completed and verified |
 | 2026-10-13 | Task 1.5 completed and verified |
+| 2026-10-13 | Task 2.1 completed and verified |

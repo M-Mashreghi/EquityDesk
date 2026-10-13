@@ -279,3 +279,11 @@ This section records the concrete contracts as tasks are implemented. It is upda
 1. **Visibility** — a document is visible to a run iff `published_at <= as_of` (inclusive). `retrieved_at` is audit metadata only. `split_as_of()` applies the same rule to any timestamped item (e.g. `FinancialFact.available_at`). A naive `as_of` is rejected. `assert_no_future_documents()` raises `FutureLeakageError` listing offending ids.
 2. **Required provenance** — primary documents (regulatory filing, issuer IR, issuer presentation) must have `source_url` or `official_id` and a SHA-256 `content_hash`; `retrieved_at >= published_at`; a `version > 1` must reference the document it supersedes.
 3. **Immutability** — stored documents are insert-only (Task 1.3) and `verify_content()` re-hashes raw bytes against the recorded hash.
+
+### Regulatory filing adapter (Task 2.1)
+
+`infrastructure/sources/sec_edgar.SecEdgarAdapter` (SEC EDGAR, US-equity scope) enumerates filings from the submissions feed (optionally following history pages), filtered by form type (default: 10-K, 10-Q, 8-K, 20-F, 40-F and amendments) and by `as_of`, then downloads primary documents into `SourceDocument` records (`document_id = sec_<accession>`, `official_id = accession`, SHA-256 hash, archive URL). `company_facts()` reads the XBRL company-facts API for Phase 3.
+
+- **Availability time:** `acceptanceDateTime` is interpreted as New York wall-clock time (the feed's `Z` suffix is unreliable) and never earlier than 00:00 New York on the official filing date. Both choices can only make a filing appear *later*, never earlier, so they cannot leak future information. `retrieved_at` is clamped to be no earlier than this conservative `published_at`.
+- **Politeness:** `infrastructure/sources/http.HttpFetcher` sends the configured `SEC_USER_AGENT` (required), enforces a process-wide minimum interval (`SEC_MAX_REQUESTS_PER_SECOND`, ≤ 10), retries only 429/5xx/transport errors with exponential backoff (honouring `Retry-After`, capped at 60 s), and raises `SourceUnavailableError` after the bound. 4xx errors are not retried.
+- **Tests:** all HTTP is served by `httpx.MockTransport` from `tests/fixtures/sec/` (synthetic subset of the EDGAR format).
