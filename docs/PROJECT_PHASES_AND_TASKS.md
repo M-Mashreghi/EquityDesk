@@ -426,7 +426,7 @@ Extract sourced descriptions of business model, revenue drivers, segments, custo
 
 ### Task 4.3: Guidance, Strategy & Management-Language Change Analyzer
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Compare approved documents to identify sourced guidance changes, strategy changes and management-language shifts.
@@ -440,10 +440,10 @@ Compare approved documents to identify sourced guidance changes, strategy change
 
 **Definition of Done (DoD)**
 
-- [ ] Before/after evidence attached; no invented guidance; ambiguous changes marked uncertain.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Before/after evidence attached; no invented guidance; ambiguous changes marked uncertain.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -857,11 +857,11 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 1 — Foundation, Research Runs & Security Master | 5 | 5 |
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 5 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
-| 4 — LLM Research Intelligence | 5 | 2 |
+| 4 — LLM Research Intelligence | 5 | 3 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **17** |
+| **Total** | **35** | **18** |
 
 ## Change Log
 
@@ -885,3 +885,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 3.5 completed and verified |
 | 2026-10-13 | Task 4.1 completed and verified |
 | 2026-10-13 | Task 4.2 completed and verified |
+| 2026-10-13 | Task 4.3 completed and verified |

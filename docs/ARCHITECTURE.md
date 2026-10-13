@@ -400,3 +400,12 @@ A triggered diagnostic is a prompt for investigation, not a conclusion.
 - Finding ids are deterministic (run, category, statement); model, prompt ref and schema version are stored on each finding.
 
 `application/research/business.BusinessModelExtractor` (prompt `business_model_extractor@1.0.0`, schema `business_extraction.v1`) extracts business model, segments, revenue drivers, customers and geography. Any field without a grounded claim — or every field, if the LLM call fails — is emitted as an explicit `unknown` / `not_supported` finding without evidence.
+
+### Guidance, strategy and tone change analyzer (Task 4.3)
+
+`application/research/changes.ChangeAnalyzer` (prompt `guidance_strategy_tone_changes@1.0.0`, schema `change_analysis.v1`) compares a prior and a current document (the prior must be published first). Each change carries type (guidance / strategy / tone), topic, direction (raised, lowered, maintained, introduced, withdrawn, shifted, unclear), before/after statements with evidence and a summary. Acceptance rules:
+
+- `before` evidence must ground in the **prior** document's chunks and `after` evidence in the **current** document's chunks; both sides are required except `introduced` (after only) and `withdrawn` (before only). Otherwise the change is rejected — so guidance can never be invented.
+- Guidance must be quoted from forward-looking language (expect, outlook, guidance, anticipate, …); otherwise `uncertain`.
+- `unclear` direction, confidence < 0.5, numbers not present in the quotes, or any dropped citation → `uncertain`.
+- Accepted changes are `inference` findings (`guidance_change`, `strategy_change`, `management_tone`) with before/after statements, document ids and chunk ids in `attributes`.
