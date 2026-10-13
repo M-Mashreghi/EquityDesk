@@ -38,3 +38,34 @@ class MetricResult(DomainModel):
         if self.status is MetricStatus.MISSING_INPUT and not self.missing:
             raise ValueError("missing_input results must name the missing inputs")
         return self
+
+
+class DiagnosticResult(DomainModel):
+    """An explainable quality-of-earnings / trend check: formula, components and threshold."""
+
+    diagnostic_id: str = Field(min_length=1)
+    company_id: str
+    name: str
+    period_end: date
+    value: float | None
+    formula: str
+    components: dict[str, float | None]
+    threshold: float | None = None
+    comparison: str | None = Field(default=None, description="'>' or '<' against threshold")
+    triggered: bool | None = Field(default=None, description="None when not computable")
+    status: MetricStatus
+    explanation: str
+    calc_version: str
+
+
+class TrendSummary(DomainModel):
+    metric: str
+    unit: str
+    points: tuple[tuple[date, float], ...]
+    first: float | None
+    last: float | None
+    change: float | None = Field(default=None, description="last - first (bps for ratios)")
+    change_unit: str | None = None
+    consecutive_declines: int = 0
+    consecutive_increases: int = 0
+    direction: str = Field(description="up | down | flat | insufficient_data")

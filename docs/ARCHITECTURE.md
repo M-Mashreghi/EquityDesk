@@ -349,3 +349,24 @@ Members are ordered by `(published_at, document_id)`. Excluded ids are recorded 
 - `undefined` — inputs exist but the formula is meaningless (division by zero, growth from a non-positive base, CAGR with non-positive endpoints).
 
 Metrics: revenue / diluted-EPS / FCF growth, gross / operating / net / FCF margins, EBITDA (= operating income + D&A), FCF (= OCF − capex), effective tax rate, total debt (= long-term + current debt + commercial paper), net debt (− cash − short-term investments), net debt / EBITDA, debt / equity, current and quick ratios, interest coverage, ROE and ROA (on average balances), ROIC (= operating income × (1 − effective tax rate) / average invested capital, invested capital = equity + total debt − cash − short-term investments), diluted-share and shares-outstanding change, DSO / DIO / DPO / cash-conversion cycle (365-day basis), cash conversion (OCF / net income), revenue CAGR. Optional debt/cash components that a filer does not report count as zero and are listed in `missing` with a note.
+
+### Trends and quality-of-earnings diagnostics (Task 3.3)
+
+`analytics/diagnostics.py`:
+
+- `trend(metric_results, name)` → `TrendSummary` (points, first/last, change — in bps for ratios —, direction up/down/flat with a 5 bps flat band, consecutive increases/declines). Fewer than two computable points → `insufficient_data`.
+- `margin_deltas_bps()` → year-over-year change of gross / operating / net / FCF margins in bps.
+- `run_diagnostics(company_id, statements)` → `DiagnosticResult`s exposing formula, components (input values), threshold, comparison, `triggered` and status (`missing_input` / `undefined` leave `triggered = None`). Heuristic thresholds:
+
+| Diagnostic | Formula | Triggers when |
+|---|---|---|
+| `low_cash_conversion` | OCF / NI (NI > 0 only) | < 0.8 |
+| `high_accruals` | (NI − OCF) / avg total assets (Sloan) | > 0.10 |
+| `receivables_outpacing_revenue` | growth(AR) − growth(revenue) | > 0.10 |
+| `inventory_outpacing_revenue` | growth(inventory) − growth(revenue) | > 0.10 |
+| `negative_fcf_with_profit` | OCF − capex (NI > 0 only) | < 0 |
+| `share_dilution` | diluted shares growth | > 2% |
+| `high_sbc_share_of_ocf` | SBC / OCF (OCF > 0 only) | > 25% |
+| `operating_margin_compression` | Δ operating margin (bps) | < −200 bps |
+
+A triggered diagnostic is a prompt for investigation, not a conclusion.

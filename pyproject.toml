@@ -54,6 +54,7 @@ known-first-party = ["equitydesk", "factories"]
 # Concept/tag mapping table is kept one concept per line for readability.
 "src/equitydesk/analytics/accounting.py" = ["E501"]
 "src/equitydesk/analytics/kpis.py" = ["E501"]
+"src/equitydesk/analytics/diagnostics.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"
