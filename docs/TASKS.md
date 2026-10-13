@@ -73,14 +73,14 @@ Update after every verified task.
 - [x] **Task 4.1** — Structured LLM Provider & Schema Validation
 - [x] **Task 4.2** — Business Model & Segment Evidence Extractor
 - [x] **Task 4.3** — Guidance, Strategy & Management-Language Change Analyzer
-- [ ] **Task 4.4** — Risk, Catalyst & Open-Question Extractor
+- [x] **Task 4.4** — Risk, Catalyst & Open-Question Extractor
 - [ ] **Task 4.5** — Evidence Validator & Research Object Quality Gate
 
 ### Verification — Phase 4
 
 | Item | Detail |
 |---|---|
-| Status | In Progress (3/5) |
+| Status | In Progress (4/5) |
 | Tests | — |
 | Docs | — |
 | Notes | — |
@@ -175,3 +175,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 4.2** (2026-10-13): Grounding layer (delimited chunks, injection guard, verbatim quote verification, number guard) and business/segment extractor; unsupported fields become explicit unknown findings. 263 tests passed; ruff + mypy clean.
 
 - **Task 4.3** (2026-10-13): Change analyzer with side-specific before/after grounding, forward-looking guard for guidance, ambiguity/number rules -> uncertain; invented guidance rejected. 272 tests passed; ruff + mypy clean.
+
+- **Task 4.4** (2026-10-13): Risk/catalyst/open-question extractor with classification + horizon, grounding-required evidence, Jaccard duplicate merging; ungrounded claims rejected. 277 tests passed; ruff + mypy clean.

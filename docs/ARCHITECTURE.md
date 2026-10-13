@@ -409,3 +409,11 @@ A triggered diagnostic is a prompt for investigation, not a conclusion.
 - Guidance must be quoted from forward-looking language (expect, outlook, guidance, anticipate, …); otherwise `uncertain`.
 - `unclear` direction, confidence < 0.5, numbers not present in the quotes, or any dropped citation → `uncertain`.
 - Accepted changes are `inference` findings (`guidance_change`, `strategy_change`, `management_tone`) with before/after statements, document ids and chunk ids in `attributes`.
+
+### Risks, catalysts and open questions (Task 4.4)
+
+`application/research/risks.RiskCatalystExtractor` (prompt `risk_catalyst_open_questions@1.0.0`, schema `risk_catalyst_extraction.v1`) returns risks and catalysts with title, statement, classification (supply_chain, competition, regulatory, legal, macro, geopolitical, product, technology, financial, customer, operational, other), horizon (near < 12 months, medium 1–3 years, long > 3 years, unspecified), confidence and evidence; and open questions with the evidence that prompted them.
+
+- Every item goes through the grounding rules of Task 4.2; items without verifiable quotes are rejected, so model memory cannot create a risk, catalyst or question.
+- Duplicates within risks or catalysts are normalized by title-token Jaccard similarity ≥ 0.6 (stop words and plural `s` removed): evidence is merged, the higher confidence kept, merged titles recorded.
+- Open questions are always stored as `uncertain` inferences — never supported facts.
