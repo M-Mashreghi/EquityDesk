@@ -304,3 +304,15 @@ This section records the concrete contracts as tasks are implemented. It is upda
 Parsers (`infrastructure/parsers/`, standard library only): `HtmlDocumentParser` (block tags, `<h1-6>` and SEC `PART`/`Item N.` headings, tables, skips script/style/comments, entity decoding, UTF-8 with cp1252 fallback), `PlainTextParser`, `PagedTextParser` (form-feed page breaks → page locators), `PdfParser` (delegates text extraction to an injected adapter; with none configured a PDF fails with `unsupported_format`). `ParserRegistry` dispatches by MIME type or content sniffing. Paragraphs longer than 2,000 characters are split at sentence boundaries. Every failure is a structured `ParseError(document_id, code)` (`empty_content`, `binary_content`, `decode_error`, `malformed`, `no_text`, `unsupported_format`), never a partial document.
 
 Parsed output is stored in `normalized_documents` keyed by (document, parser name, parser version) — schema v2, applied additively to v1 databases; re-parsing with the same parser must reproduce identical output.
+
+### Hashing, deduplication and versions (Task 2.4)
+
+`application/document_store.DocumentIngestionService.ingest(document, content)`:
+
+1. Re-hashes the bytes (SHA-256) and rejects a mismatch with the declared hash.
+2. An official id (SEC accession) already stored with the same bytes → `duplicate`; with different bytes → `ProvenanceError` (accessions are immutable upstream).
+3. Identical bytes already stored for the company → `duplicate` of the existing record, unless the new record proves an *earlier* publication; then both are kept (the snapshot builder dedupes by hash) so earlier availability is never lost.
+4. Same `source_url` with new bytes (IR page edits) → `new_version` with `version = latest + 1` and `supersedes_document_id`; a version back-dated before its predecessor is rejected.
+5. `X/A` forms → `amendment`, linked by `amends_document_id` to the latest original `X` for the same `period_end` published before it (or flagged when none is stored).
+
+Nothing is overwritten: every version stays queryable (`version_chain()`). Raw bytes go to `infrastructure/db/raw_store.FilesystemRawStore` — content-addressed (`<root>/<hash[:2]>/<hash>`), atomic writes, hash verified on every read; `SourceDocument.raw_ref` holds the hash.

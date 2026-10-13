@@ -211,7 +211,7 @@ Parse supported HTML/text/PDF-like inputs behind adapters into sections/chunks w
 
 ### Task 2.4: Document Hashing, Deduplication & Amendment/Version Links
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Deduplicate identical content and retain filing amendments/new versions without destructive overwrite.
@@ -225,10 +225,10 @@ Deduplicate identical content and retain filing amendments/new versions without 
 
 **Definition of Done (DoD)**
 
-- [ ] Hash dedupe and amendment/version tests pass; historical version remains queryable.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Hash dedupe and amendment/version tests pass; historical version remains queryable.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -855,13 +855,13 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | Phase | Tasks | Completed |
 |---|---:|---:|
 | 1 — Foundation, Research Runs & Security Master | 5 | 5 |
-| 2 — Primary-Source Collection & Document Pipeline | 5 | 3 |
+| 2 — Primary-Source Collection & Document Pipeline | 5 | 4 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 0 |
 | 4 — LLM Research Intelligence | 5 | 0 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **8** |
+| **Total** | **35** | **9** |
 
 ## Change Log
 
@@ -876,3 +876,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 2.1 completed and verified |
 | 2026-10-13 | Task 2.2 completed and verified |
 | 2026-10-13 | Task 2.3 completed and verified |
+| 2026-10-13 | Task 2.4 completed and verified |

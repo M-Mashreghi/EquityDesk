@@ -347,6 +347,15 @@ class SqliteDocumentRepository:
         )
         return [SourceDocument.model_validate_json(r["payload"]) for r in rows]
 
+    def find_by_source_url(self, company_id: str, source_url: str) -> list[SourceDocument]:
+        rows = self.db.conn.execute(
+            "SELECT payload FROM source_documents WHERE company_id = ? "
+            "AND json_extract(payload, '$.source_url') = ? "
+            "ORDER BY json_extract(payload, '$.version'), published_at",
+            (company_id, source_url),
+        )
+        return [SourceDocument.model_validate_json(r["payload"]) for r in rows]
+
 
 class SqliteFindingRepository:
     def __init__(self, db: Database) -> None:
