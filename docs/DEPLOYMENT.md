@@ -15,18 +15,27 @@ Avoid adding Redis/Postgres/queues until the workload requires them.
 
 ## 2. Environment Variables
 
-Example keys (exact names finalized by implementation tasks):
+Settings are loaded by `equitydesk.config.load_settings()` from an optional `.env` file, overridden by the process environment. Invalid or missing required values fail at startup with one `ConfigError` listing every problem (secret values are never echoed). The authoritative template is `.env.example`.
 
-```text
-EQUITYDESK_ENV=production
-EQUITYDESK_DB_PATH=/app/data/equitydesk.db
-EQUITYDESK_DATA_DIR=/app/data
-EQUITYDESK_CACHE_DIR=/app/cache
-LLM_PROVIDER=...
-LLM_MODEL=...
-LLM_API_KEY=...
-# optional market/estimate provider keys
-```
+| Key | Default | Notes |
+|---|---|---|
+| `EQUITYDESK_ENV` | `development` | `development` / `test` / `production` |
+| `EQUITYDESK_DB_PATH` | `data/equitydesk.db` | SQLite system of record |
+| `EQUITYDESK_DATA_DIR` | `data` | raw source snapshots live under `data/raw` |
+| `EQUITYDESK_CACHE_DIR` | `data/cache` | rebuildable |
+| `EQUITYDESK_LOG_LEVEL` | `INFO` | |
+| `EQUITYDESK_LOG_FORMAT` | `json` | `json` or `text`; both are secret-scrubbed |
+| `SEC_USER_AGENT` | — | required in production; must contain a contact e-mail |
+| `SEC_MAX_REQUESTS_PER_SECOND` | `5` | capped at 10 (SEC fair-access limit) |
+| `LLM_PROVIDER` | `fake` | `fake` (offline, deterministic) or `anthropic`; `fake` is rejected in production |
+| `LLM_MODEL` | — | required for a real provider |
+| `LLM_API_KEY` | — | secret; required for a real provider |
+| `LLM_TIMEOUT_SECONDS` | `60` | |
+| `LLM_MAX_RETRIES` | `2` | bounded retries for timeouts / schema failures |
+| `ALERT_WEBHOOK_URL` | — | secret; optional alert hook |
+| `ALERT_WEBHOOK_TOKEN` | — | secret; optional alert hook |
+
+Logging: `equitydesk.logging_setup.configure_logging()` installs a JSON (or text) handler that redacts registered secret values, `Authorization`/API-key shapes, and secret-named dict keys. Every record carries `correlation_id` and `research_run_id` bound with `log_context()`.
 
 Never commit real values.
 

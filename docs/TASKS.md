@@ -20,7 +20,7 @@ Update after every verified task.
 ## Phase 1 — Foundation, Research Runs & Security Master
 
 - [x] **Task 1.1** — Python Project Scaffold & Architecture Guardrails
-- [ ] **Task 1.2** — Configuration, Secrets & Structured Logging
+- [x] **Task 1.2** — Configuration, Secrets & Structured Logging
 - [ ] **Task 1.3** — Core Domain Models & SQLite Persistence
 - [ ] **Task 1.4** — Company / Security Resolver
 - [ ] **Task 1.5** — Point-in-Time Source Provenance Contract
@@ -29,7 +29,7 @@ Update after every verified task.
 
 | Item | Detail |
 |---|---|
-| Status | In Progress (1/5) |
+| Status | In Progress (2/5) |
 | Tests | — |
 | Docs | — |
 | Notes | — |
@@ -141,3 +141,5 @@ Update after every verified task.
 Record task completion evidence, commands, test counts, and important implementation notes here as work proceeds.
 
 - **Task 1.1** (2026-10-13): Package scaffold (src layout, pyproject, dev tools), .env.example, layer import guardrail test. `pytest`: 16 passed; ruff + mypy strict clean.
+
+- **Task 1.2** (2026-10-13): Typed settings (`config.py`) with fail-fast `ConfigError`, SecretStr secrets, JSON/text logging with secret scrubbing and correlation/run context (`logging_setup.py`). 35 tests passed; ruff + mypy clean.
