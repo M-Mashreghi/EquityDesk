@@ -37,7 +37,7 @@ Update after every verified task.
 ## Phase 2 — Primary-Source Collection & Document Pipeline
 
 - [x] **Task 2.1** — Regulatory Filing Adapter
-- [ ] **Task 2.2** — Issuer Investor-Relations Adapter
+- [x] **Task 2.2** — Issuer Investor-Relations Adapter
 - [ ] **Task 2.3** — Document Parser & Normalized Document Model
 - [ ] **Task 2.4** — Document Hashing, Deduplication & Amendment/Version Links
 - [ ] **Task 2.5** — Point-in-Time Research Snapshot Builder
@@ -46,7 +46,7 @@ Update after every verified task.
 
 | Item | Detail |
 |---|---|
-| Status | In Progress (1/5) |
+| Status | In Progress (2/5) |
 | Tests | — |
 | Docs | — |
 | Notes | — |
@@ -151,3 +151,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 1.5** (2026-10-13): Provenance contract: inclusive published_at<=as_of visibility, FutureLeakageError, required URL/official id + SHA-256 for primary docs, content re-hash verification. 99 tests passed; ruff + mypy clean.
 
 - **Task 2.1** (2026-10-13): SEC EDGAR adapter: filing enumeration by form/as_of with conservative availability time, polite HttpFetcher (UA, rate limit, bounded retries), document fetch with provenance; HTTP mocked. 114 tests passed; ruff + mypy clean.
+
+- **Task 2.2** (2026-10-13): Issuer IR adapter with manual registration, approved official domains/URL patterns (Apple, Microsoft, ASML), redirect and scheme checks, secondary downgrade only when explicitly allowed. 127 tests passed; ruff + mypy clean.

@@ -287,3 +287,12 @@ This section records the concrete contracts as tasks are implemented. It is upda
 - **Availability time:** `acceptanceDateTime` is interpreted as New York wall-clock time (the feed's `Z` suffix is unreliable) and never earlier than 00:00 New York on the official filing date. Both choices can only make a filing appear *later*, never earlier, so they cannot leak future information. `retrieved_at` is clamped to be no earlier than this conservative `published_at`.
 - **Politeness:** `infrastructure/sources/http.HttpFetcher` sends the configured `SEC_USER_AGENT` (required), enforces a process-wide minimum interval (`SEC_MAX_REQUESTS_PER_SECOND`, ≤ 10), retries only 429/5xx/transport errors with exponential backoff (honouring `Retry-After`, capped at 60 s), and raises `SourceUnavailableError` after the bound. 4xx errors are not retried.
 - **Tests:** all HTTP is served by `httpx.MockTransport` from `tests/fixtures/sec/` (synthetic subset of the EDGAR format).
+
+### Issuer investor-relations adapter (Task 2.2)
+
+`infrastructure/sources/investor_relations.IssuerIRAdapter` registers official IR documents from an explicit `ManualSourceRegistration` (company, URL, timezone-aware `published_at`, optional document type), because IR sites rarely expose reliable machine-readable timestamps. Per-issuer configuration lives in `data/fixtures/ir_sources.json` (approved official domains + URL patterns; Apple newsroom earnings releases and financial-statement PDFs, Microsoft earnings pages, ASML press releases).
+
+- Only `https` URLs on an approved domain (or its subdomains), without credentials or non-standard ports, are accepted. Redirects off the approved domains are rejected.
+- Unapproved URLs are rejected by default; with `allow_unapproved=True` they are stored as `secondary`, so they can never pose as primary sources.
+- Matching patterns supply the document type; a `published_at` earlier than the date encoded in the URL is rejected as inconsistent.
+- `document_id = ir_<sha256(url)[:16]>_<content-hash[:12]>`: the same URL with changed content becomes a new document (versioning is handled by Task 2.4).

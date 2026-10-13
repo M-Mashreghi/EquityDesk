@@ -1,0 +1,44 @@
+{
+  "version": "2026-10-13",
+  "description": "Approved official investor-relations domains and URL patterns per issuer.",
+  "issuers": [
+    {
+      "company_id": "co_apple",
+      "approved_domains": ["apple.com"],
+      "patterns": [
+        {
+          "regex": "^https://www\\.apple\\.com/newsroom/(?P<year>\\d{4})/(?P<month>\\d{2})/apple-reports-[a-z0-9-]*results[a-z0-9-]*/?$",
+          "document_type": "earnings_release",
+          "source_type": "issuer_ir"
+        },
+        {
+          "regex": "^https://www\\.apple\\.com/newsroom/pdfs/fy(?P<year>\\d{4})-q[1-4]/[A-Za-z0-9_]+\\.pdf$",
+          "document_type": "financial_statements",
+          "source_type": "issuer_ir"
+        }
+      ]
+    },
+    {
+      "company_id": "co_microsoft",
+      "approved_domains": ["microsoft.com"],
+      "patterns": [
+        {
+          "regex": "^https://www\\.microsoft\\.com/en-us/investor/earnings/fy-\\d{4}-q[1-4]/press-release-webcast/?$",
+          "document_type": "earnings_release",
+          "source_type": "issuer_ir"
+        }
+      ]
+    },
+    {
+      "company_id": "co_asml",
+      "approved_domains": ["asml.com"],
+      "patterns": [
+        {
+          "regex": "^https://www\\.asml\\.com/en/news/press-releases/(?P<year>\\d{4})/[a-z0-9-]+$",
+          "document_type": "earnings_release",
+          "source_type": "issuer_ir"
+        }
+      ]
+    }
+  ]
+}
