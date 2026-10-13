@@ -51,6 +51,8 @@ known-first-party = ["equitydesk", "factories"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S", "DTZ"]
+# Concept/tag mapping table is kept one concept per line for readability.
+"src/equitydesk/analytics/accounting.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"

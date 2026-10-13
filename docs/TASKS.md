@@ -53,7 +53,7 @@ Update after every verified task.
 
 ## Phase 3 — Financial Statements & Deterministic Analytics
 
-- [ ] **Task 3.1** — Standardized Financial Fact Model & Statement Mapper
+- [x] **Task 3.1** — Standardized Financial Fact Model & Statement Mapper
 - [ ] **Task 3.2** — Historical KPI & Ratio Engine
 - [ ] **Task 3.3** — Trend, Change & Quality-of-Earnings Diagnostics
 - [ ] **Task 3.4** — Peer Set & Comparable Metrics Foundation
@@ -63,7 +63,7 @@ Update after every verified task.
 
 | Item | Detail |
 |---|---|
-| Status | Not Started |
+| Status | In Progress (1/5) |
 | Tests | — |
 | Docs | — |
 | Notes | — |
@@ -159,3 +159,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 2.4** (2026-10-13): Ingestion service: hash verification, content dedupe (keeping earlier publications), immutable accessions, URL-based version chains, amendment links; content-addressed filesystem raw store. 157 tests passed; ruff + mypy clean.
 
 - **Task 2.5** (2026-10-13): Snapshot builder: as_of filter, newest-visible version, hash dedupe to earliest publication, deterministic content-derived snapshot id, persisted immutable membership (schema v3). 163 tests passed; ruff + mypy clean.
+
+- **Task 3.1** (2026-10-13): XBRL company-facts parser + concept mapper (priority tags, FY/Q classification, unit checks, point-in-time restatements, conflicts as issues, derived gross profit) with Apple FY2021-2023 fixture. 175 tests passed; ruff + mypy clean.

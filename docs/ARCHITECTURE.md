@@ -327,3 +327,15 @@ Nothing is overwritten: every version stays queryable (`version_chain()`). Raw b
 4. amendments and originals are both members (distinct filings).
 
 Members are ordered by `(published_at, document_id)`. Excluded ids are recorded by reason (`future`, `superseded`, `duplicate`). `snapshot_id = snap_<sha256(company, as_of, builder version, sorted members)>`, so frozen inputs always produce the same id and member list, independent of input order. Membership is persisted (`research_snapshots`, `snapshot_documents`; schema v3) and immutable: rebuilding a run returns the stored snapshot even after newer documents arrive.
+
+### Financial statement mapping (Task 3.1)
+
+- `infrastructure/sources/xbrl_facts.parse_company_facts()` flattens SEC company-facts JSON into `domain.financials.RawReportedFact` (taxonomy, tag, unit, value, period, accession, form, filed date, `available_at`). Availability comes from the submissions feed acceptance time when supplied, else the end of the filing day (New York).
+- `analytics/accounting.map_reported_facts(company_id, raw, as_of)` maps ~35 standard concepts (`CONCEPTS`: income statement, balance sheet, cash flow, per-share, share counts) from priority-ordered XBRL tags into `FinancialFact`s:
+  - only facts with `available_at <= as_of`;
+  - durations classified as fiscal year (330–380 days) or quarter (80–100 days); YTD and other durations are skipped;
+  - unit kind must match the concept (monetary ISO currency / `shares` / `CCY/shares`), otherwise `unit_mismatch`; different currencies for the same concept and period are kept apart and flagged `multiple_units`;
+  - per (concept, period, unit): highest-priority tag, then the latest filing visible at `as_of` (restatements apply only once public, flagged `restated`); disagreeing lower-priority tags are flagged `tag_conflict`;
+  - fact ids are deterministic; `GrossProfit` is derived (`origin=derived`, `derived_from`) only when not reported;
+  - `fiscal_year` for annual facts is the calendar year of the period end (approximation for non-calendar fiscal years).
+- `annual_statements(facts, currency)` gives a fiscal-year view (FY durations plus balance-sheet instants at the FY end) without mixing currencies.

@@ -257,11 +257,11 @@ Build the exact document set visible to a ResearchRun and persist snapshot membe
 
 ## Phase 3: Financial Statements & Deterministic Analytics
 
-**Status:** `[ ]` Not Started
+**Status:** `[-]` In Progress
 
 ### Task 3.1: Standardized Financial Fact Model & Statement Mapper
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Map sourced structured facts into normalized income statement, balance sheet and cash-flow concepts with provenance.
@@ -275,10 +275,10 @@ Map sourced structured facts into normalized income statement, balance sheet and
 
 **Definition of Done (DoD)**
 
-- [ ] Hand-curated fixtures map periods/units correctly; incompatible facts are not silently merged.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Hand-curated fixtures map periods/units correctly; incompatible facts are not silently merged.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -856,12 +856,12 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 |---|---:|---:|
 | 1 — Foundation, Research Runs & Security Master | 5 | 5 |
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 5 |
-| 3 — Financial Statements & Deterministic Analytics | 5 | 0 |
+| 3 — Financial Statements & Deterministic Analytics | 5 | 1 |
 | 4 — LLM Research Intelligence | 5 | 0 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **10** |
+| **Total** | **35** | **11** |
 
 ## Change Log
 
@@ -878,3 +878,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 2.3 completed and verified |
 | 2026-10-13 | Task 2.4 completed and verified |
 | 2026-10-13 | Task 2.5 completed and verified |
+| 2026-10-13 | Task 3.1 completed and verified |

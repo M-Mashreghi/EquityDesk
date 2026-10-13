@@ -55,3 +55,23 @@ class FinancialFact(DomainModel):
         if self.origin is not FactOrigin.REPORTED and not self.derived_from:
             raise ValueError("derived/normalized/adjusted facts must list derived_from")
         return self
+
+
+class RawReportedFact(DomainModel):
+    """A fact exactly as reported in a filing's structured data (before standardization)."""
+
+    company_id: str
+    taxonomy: str = Field(description="e.g. us-gaap, dei")
+    tag: str
+    unit: str
+    value: float
+    period_start: date | None = None
+    period_end: date
+    accession: str
+    form: str
+    filed: date
+    available_at: UtcDateTime
+
+    @property
+    def locator(self) -> str:
+        return f"{self.taxonomy}:{self.tag}"
