@@ -92,7 +92,7 @@ def render_chunks(
     return "\n".join(parts), used
 
 
-def _norm(text: str) -> str:
+def normalize_text(text: str) -> str:
     text = text.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
     return " ".join(text.split()).casefold()
 
@@ -120,7 +120,7 @@ def ground(refs: Iterable[EvidenceRef], index: dict[str, SourceChunk]) -> Ground
         if len(ref.quote.strip()) < MIN_QUOTE_CHARS:
             result.problems.append(f"quote too short in {ref.chunk_id}")
             continue
-        if _norm(ref.quote) not in _norm(sc.chunk.text):
+        if normalize_text(ref.quote) not in normalize_text(sc.chunk.text):
             result.problems.append(f"quote not found verbatim in {ref.chunk_id}")
             continue
         result.spans.append(

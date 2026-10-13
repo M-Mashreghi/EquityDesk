@@ -417,3 +417,20 @@ A triggered diagnostic is a prompt for investigation, not a conclusion.
 - Every item goes through the grounding rules of Task 4.2; items without verifiable quotes are rejected, so model memory cannot create a risk, catalyst or question.
 - Duplicates within risks or catalysts are normalized by title-token Jaccard similarity ≥ 0.6 (stop words and plural `s` removed): evidence is merged, the higher confidence kept, merged titles recorded.
 - Open questions are always stored as `uncertain` inferences — never supported facts.
+
+### Evidence validator and quality gate (Task 4.5)
+
+`application/research/quality_gate.EvidenceQualityGate.validate(run_id, as_of, snapshot, findings, documents, normalized)` re-checks every finding independently of how it was produced:
+
+| Check | Effect |
+|---|---|
+| finding belongs to another run | **blocking** — rejected |
+| evidence document unknown, published after `as_of`, or not a snapshot member | span dropped |
+| chunk locator does not exist in the normalized document | span dropped |
+| quote not found verbatim in the chunk | span dropped |
+| fact/inference with no surviving span | **blocking** — rejected |
+| some spans dropped | warning — downgraded to `uncertain` |
+| confidence below 0.5 | warning — `uncertain` |
+| fact supported only by secondary sources | warning — `uncertain` (source hierarchy) |
+
+Accepted findings carry the surviving evidence and the issue codes in `attributes.quality_issues`; the `QualityReport` lists accepted, rejected and all issues (with severity).

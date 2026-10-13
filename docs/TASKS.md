@@ -74,16 +74,16 @@ Update after every verified task.
 - [x] **Task 4.2** — Business Model & Segment Evidence Extractor
 - [x] **Task 4.3** — Guidance, Strategy & Management-Language Change Analyzer
 - [x] **Task 4.4** — Risk, Catalyst & Open-Question Extractor
-- [ ] **Task 4.5** — Evidence Validator & Research Object Quality Gate
+- [x] **Task 4.5** — Evidence Validator & Research Object Quality Gate
 
 ### Verification — Phase 4
 
 | Item | Detail |
 |---|---|
-| Status | In Progress (4/5) |
-| Tests | — |
-| Docs | — |
-| Notes | — |
+| Status | Completed |
+| Tests | `pytest`: 288 passed; LLM always mocked (ScriptedLLMProvider / fake SDK client) |
+| Docs | ARCHITECTURE.md contracts 4.1–4.5 |
+| Notes | Anthropic adapter is an optional extra (.[llm]); default model claude-opus-5-5 with server-side refusal fallbacks |
 
 ## Phase 5 — Valuation, Scenarios, Thesis & Report Review
 
@@ -177,3 +177,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 4.3** (2026-10-13): Change analyzer with side-specific before/after grounding, forward-looking guard for guidance, ambiguity/number rules -> uncertain; invented guidance rejected. 272 tests passed; ruff + mypy clean.
 
 - **Task 4.4** (2026-10-13): Risk/catalyst/open-question extractor with classification + horizon, grounding-required evidence, Jaccard duplicate merging; ungrounded claims rejected. 277 tests passed; ruff + mypy clean.
+
+- **Task 4.5** (2026-10-13): Evidence quality gate: snapshot membership, future-evidence, locator and verbatim-quote checks; blocking rejections vs. warning downgrades (partial evidence, low confidence, secondary-only facts). 288 tests passed; ruff + mypy clean.

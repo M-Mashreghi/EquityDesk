@@ -376,7 +376,7 @@ Implement market snapshot inputs and reusable EV/equity bridge, multiple, discou
 
 ## Phase 4: LLM Research Intelligence
 
-**Status:** `[-]` In Progress
+**Status:** `[x]` Completed
 
 ### Task 4.1: Structured LLM Provider & Schema Validation
 
@@ -472,7 +472,7 @@ Extract and classify risks, catalysts and unresolved questions with horizon/conf
 
 ### Task 4.5: Evidence Validator & Research Object Quality Gate
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Validate source spans, snapshot membership, citation locators, confidence rules and material-claim support.
@@ -486,10 +486,10 @@ Validate source spans, snapshot membership, citation locators, confidence rules 
 
 **Definition of Done (DoD)**
 
-- [ ] Unsupported/future evidence is rejected; quality-gate tests cover edge cases.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Unsupported/future evidence is rejected; quality-gate tests cover edge cases.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -857,11 +857,11 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 1 — Foundation, Research Runs & Security Master | 5 | 5 |
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 5 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
-| 4 — LLM Research Intelligence | 5 | 4 |
+| 4 — LLM Research Intelligence | 5 | 5 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **19** |
+| **Total** | **35** | **20** |
 
 ## Change Log
 
@@ -887,3 +887,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 4.2 completed and verified |
 | 2026-10-13 | Task 4.3 completed and verified |
 | 2026-10-13 | Task 4.4 completed and verified |
+| 2026-10-13 | Task 4.5 completed and verified |
