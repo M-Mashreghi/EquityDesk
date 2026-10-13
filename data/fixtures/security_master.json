@@ -1,0 +1,31 @@
+{
+  "version": "2026-10-13",
+  "description": "Curated security master for development and tests. Identifiers are public reference data.",
+  "companies": [
+    {"company_id": "co_apple", "name": "Apple Inc.", "country": "US", "cik": "0000320193", "aliases": ["Apple"], "sector": "Technology Hardware"},
+    {"company_id": "co_microsoft", "name": "Microsoft Corporation", "country": "US", "cik": "0000789019", "aliases": ["Microsoft"], "sector": "Software"},
+    {"company_id": "co_nvidia", "name": "NVIDIA Corporation", "country": "US", "cik": "0001045810", "aliases": ["Nvidia"], "sector": "Semiconductors"},
+    {"company_id": "co_alphabet", "name": "Alphabet Inc.", "country": "US", "cik": "0001652044", "aliases": ["Google", "Alphabet"], "sector": "Interactive Media"},
+    {"company_id": "co_asml", "name": "ASML Holding N.V.", "country": "NL", "cik": "0000937966", "aliases": ["ASML"], "sector": "Semiconductor Equipment"},
+    {"company_id": "co_shopify", "name": "Shopify Inc.", "country": "CA", "cik": "0001594805", "aliases": ["Shopify"], "sector": "Software"},
+    {"company_id": "co_amat", "name": "Applied Materials, Inc.", "country": "US", "cik": "0000006951", "aliases": ["Applied Materials"], "sector": "Semiconductor Equipment"},
+    {"company_id": "co_lrcx", "name": "Lam Research Corporation", "country": "US", "cik": "0000707549", "aliases": ["Lam Research"], "sector": "Semiconductor Equipment"},
+    {"company_id": "co_klac", "name": "KLA Corporation", "country": "US", "cik": "0000319201", "aliases": ["KLA", "KLA-Tencor"], "sector": "Semiconductor Equipment"},
+    {"company_id": "co_aple", "name": "Apple Hospitality REIT, Inc.", "country": "US", "cik": "0001418121", "aliases": [], "sector": "Real Estate"}
+  ],
+  "securities": [
+    {"security_id": "sec_aapl_xnas", "company_id": "co_apple", "ticker": "AAPL", "exchange": "XNAS", "currency": "USD", "isin": "US0378331005", "is_primary_listing": true},
+    {"security_id": "sec_msft_xnas", "company_id": "co_microsoft", "ticker": "MSFT", "exchange": "XNAS", "currency": "USD", "isin": "US5949181045", "is_primary_listing": true},
+    {"security_id": "sec_nvda_xnas", "company_id": "co_nvidia", "ticker": "NVDA", "exchange": "XNAS", "currency": "USD", "isin": "US67066G1040", "is_primary_listing": true},
+    {"security_id": "sec_googl_xnas", "company_id": "co_alphabet", "ticker": "GOOGL", "exchange": "XNAS", "currency": "USD", "share_class": "A", "isin": "US02079K3059", "is_primary_listing": true},
+    {"security_id": "sec_goog_xnas", "company_id": "co_alphabet", "ticker": "GOOG", "exchange": "XNAS", "currency": "USD", "share_class": "C", "isin": "US02079K1079", "is_primary_listing": false},
+    {"security_id": "sec_asml_xams", "company_id": "co_asml", "ticker": "ASML", "exchange": "XAMS", "currency": "EUR", "isin": "NL0010273215", "is_primary_listing": true},
+    {"security_id": "sec_asml_xnas", "company_id": "co_asml", "ticker": "ASML", "exchange": "XNAS", "currency": "USD", "security_type": "adr", "isin": "USN070592100", "is_primary_listing": false},
+    {"security_id": "sec_shop_xnys", "company_id": "co_shopify", "ticker": "SHOP", "exchange": "XNYS", "currency": "USD", "isin": "CA82509L1076", "is_primary_listing": false},
+    {"security_id": "sec_shop_xtse", "company_id": "co_shopify", "ticker": "SHOP", "exchange": "XTSE", "currency": "CAD", "isin": "CA82509L1076", "is_primary_listing": true},
+    {"security_id": "sec_amat_xnas", "company_id": "co_amat", "ticker": "AMAT", "exchange": "XNAS", "currency": "USD", "isin": "US0382221051", "is_primary_listing": true},
+    {"security_id": "sec_lrcx_xnas", "company_id": "co_lrcx", "ticker": "LRCX", "exchange": "XNAS", "currency": "USD", "isin": "US5128073062", "is_primary_listing": true},
+    {"security_id": "sec_klac_xnas", "company_id": "co_klac", "ticker": "KLAC", "exchange": "XNAS", "currency": "USD", "isin": "US4824801009", "is_primary_listing": true},
+    {"security_id": "sec_aple_xnys", "company_id": "co_aple", "ticker": "APLE", "exchange": "XNYS", "currency": "USD", "isin": "US03784Y2000", "is_primary_listing": true}
+  ]
+}

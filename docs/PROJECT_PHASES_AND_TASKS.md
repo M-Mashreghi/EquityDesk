@@ -92,7 +92,7 @@ Create Company, Security, ResearchRun, SourceDocument, ResearchFinding, Financia
 
 ### Task 1.4: Company / Security Resolver
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Resolve user ticker/company input to canonical issuer/security identifiers with explicit ambiguity handling.
@@ -106,10 +106,10 @@ Resolve user ticker/company input to canonical issuer/security identifiers with 
 
 **Definition of Done (DoD)**
 
-- [ ] Known fixtures resolve; ambiguous/missing input is structured; ticker alone is not assumed globally unique.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Known fixtures resolve; ambiguous/missing input is structured; ticker alone is not assumed globally unique.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -854,14 +854,14 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 
 | Phase | Tasks | Completed |
 |---|---:|---:|
-| 1 — Foundation, Research Runs & Security Master | 5 | 3 |
+| 1 — Foundation, Research Runs & Security Master | 5 | 4 |
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 0 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 0 |
 | 4 — LLM Research Intelligence | 5 | 0 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **3** |
+| **Total** | **35** | **4** |
 
 ## Change Log
 
@@ -871,3 +871,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 1.1 completed and verified |
 | 2026-10-13 | Task 1.2 completed and verified |
 | 2026-10-13 | Task 1.3 completed and verified |
+| 2026-10-13 | Task 1.4 completed and verified |
