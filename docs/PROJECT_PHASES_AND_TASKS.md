@@ -403,7 +403,7 @@ Create provider abstraction, retries/timeouts, prompt versioning, schema parsing
 
 ### Task 4.2: Business Model & Segment Evidence Extractor
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Extract sourced descriptions of business model, revenue drivers, segments, customers/geography where supported.
@@ -417,10 +417,10 @@ Extract sourced descriptions of business model, revenue drivers, segments, custo
 
 **Definition of Done (DoD)**
 
-- [ ] Every accepted finding has source evidence; unsupported fields remain unknown.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Every accepted finding has source evidence; unsupported fields remain unknown.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -857,11 +857,11 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 1 — Foundation, Research Runs & Security Master | 5 | 5 |
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 5 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
-| 4 — LLM Research Intelligence | 5 | 1 |
+| 4 — LLM Research Intelligence | 5 | 2 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **16** |
+| **Total** | **35** | **17** |
 
 ## Change Log
 
@@ -884,3 +884,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 3.4 completed and verified |
 | 2026-10-13 | Task 3.5 completed and verified |
 | 2026-10-13 | Task 4.1 completed and verified |
+| 2026-10-13 | Task 4.2 completed and verified |

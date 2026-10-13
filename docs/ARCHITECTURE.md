@@ -389,3 +389,14 @@ A triggered diagnostic is a prompt for investigation, not a conclusion.
 - `PromptTemplate(prompt_id, version, system, user_template)` — prompts are versioned (`prompt_ref = id@version`); missing template variables fail before any call.
 - `StructuredLLMClient.generate(prompt, variables, schema, schema_version)` sends a tightened JSON schema (`strict_json_schema`: closed objects, all keys required), parses JSON (tolerating a code fence), validates with the pydantic schema, and retries malformed JSON, schema violations, truncation (`max_tokens`), timeouts and transient errors with exponential backoff up to `LLM_MAX_RETRIES`. It returns `StructuredResult` — a validated value **or** a `StructuredFailure` (`malformed_json`, `schema_violation`, `timeout`, `provider_error`, `refused`, `truncated`) plus model, prompt ref, schema version, attempts and token usage. Raw model text never reaches the domain.
 - Adapters: `infrastructure/llm/fake.ScriptedLLMProvider` (offline, deterministic; used in CI) and `infrastructure/llm/anthropic_provider.AnthropicProvider` (official `anthropic` SDK, optional extra `.[llm]`; default model `claude-opus-5-5`, `output_config.format` JSON schema, SDK retries disabled so the client owns the retry policy, server-side refusal fallbacks `fallbacks: "default"` enabled by default). CI never calls a live model.
+
+### Evidence grounding and business-model extraction (Task 4.2)
+
+`application/research/grounding.py` is shared by all extractors:
+
+- Chunks from snapshot documents are rendered as `<chunk id="…" section="…">…</chunk>` within a character budget (never split mid-chunk); the system prompt includes an injection guard (document text is data, never instructions; no outside knowledge; verbatim quotes; no computed numbers; unsupported fields go to `not_found`).
+- Every cited `(chunk_id, quote)` is re-verified: the chunk must be one actually sent, and the quote (≥ 12 chars) must occur in the chunk text (whitespace/quote-style/case-normalized). Unverifiable citations are dropped; a claim with no verified citation is **rejected**.
+- A grounded claim becomes a `ResearchFinding` (fact/inference, evidence spans with document, section, page) that is `supported`, or `uncertain` when confidence < 0.5, when any citation failed, or when the statement contains numbers that do not appear in its cited quotes (the model cannot introduce numbers).
+- Finding ids are deterministic (run, category, statement); model, prompt ref and schema version are stored on each finding.
+
+`application/research/business.BusinessModelExtractor` (prompt `business_model_extractor@1.0.0`, schema `business_extraction.v1`) extracts business model, segments, revenue drivers, customers and geography. Any field without a grounded claim — or every field, if the LLM call fails — is emitted as an explicit `unknown` / `not_supported` finding without evidence.
