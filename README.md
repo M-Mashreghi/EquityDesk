@@ -141,6 +141,12 @@ uvicorn equitydesk.api.app:default_app --factory --port 8000
 curl -fsS http://localhost:8000/healthz
 ```
 
+Run the dashboard against the API (`pip install -e ".[dashboard]"`):
+
+```bash
+EQUITYDESK_API_URL=http://localhost:8000 streamlit run src/equitydesk/dashboard/app.py
+```
+
 Layer import rules (`domain` cannot import UI/HTTP/persistence/LLM code, the dashboard cannot import analytics or storage, etc.) are enforced by `tests/unit/test_architecture.py`.
 
 ## Documentation

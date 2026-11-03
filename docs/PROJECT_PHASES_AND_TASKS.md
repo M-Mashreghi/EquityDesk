@@ -641,7 +641,7 @@ Expose company lookup, research-run create/status, documents, financials, valuat
 
 ### Task 6.2: Streamlit Research Dashboard
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Build company search, run launcher, progress, source explorer, financial charts, valuation/scenario views and report reader.
@@ -655,10 +655,10 @@ Build company search, run launcher, progress, source explorer, financial charts,
 
 **Definition of Done (DoD)**
 
-- [ ] Primary workflow works on desktop; dashboard delegates to services/API.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Primary workflow works on desktop; dashboard delegates to services/API.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -859,9 +859,9 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
 | 4 — LLM Research Intelligence | 5 | 5 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 5 |
-| 6 — API, Dashboard & Research Workflow Automation | 5 | 1 |
+| 6 — API, Dashboard & Research Workflow Automation | 5 | 2 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **26** |
+| **Total** | **35** | **27** |
 
 ## Change Log
 
@@ -894,3 +894,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-11-03 | Task 5.4 completed and verified |
 | 2026-11-03 | Task 5.5 completed and verified |
 | 2026-11-03 | Task 6.1 completed and verified |
+| 2026-11-03 | Task 6.2 completed and verified |

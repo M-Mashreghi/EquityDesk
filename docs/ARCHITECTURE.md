@@ -533,3 +533,10 @@ Accepted findings carry the surviving evidence and the issue codes in `attribute
 | GET | `/research-runs/{id}/report?format=json\|markdown` | report + review (or Markdown) |
 
 - Every error has the shape `{"error": {"code", "message", "details"}}`: `validation_error` (422, with `loc`/`msg`/`type` per field), `invalid_request` (422), `domain_rule_violation` (422), `not_found` (404), `ambiguous` (409, with candidates). Request bodies reject unknown fields. The API contains no research, valuation or persistence logic (enforced by the layer guardrail test).
+
+### Streamlit research dashboard (Task 6.2)
+
+- The dashboard is a thin client (optional extra `.[dashboard]`): it reaches EquityDesk only through `dashboard/client.ApiClient` (httpx over the research API; API errors become `ApiError` with the structured code, message and details). The layer guardrail forbids it from importing application, analytics, reporting, infrastructure or storage code.
+- `dashboard/views.py` only reshapes API JSON for display (run progress over the lifecycle, document table, KPI series/table, valuation and scenario tables, labeled scenario assumptions, review findings ordered by severity); it derives no numbers.
+- `dashboard/app.py` (run with `EQUITYDESK_API_URL=… streamlit run src/equitydesk/dashboard/app.py`): sidebar company search (resolve, ambiguity candidates), run launcher (`as_of` = end of the chosen UTC day, capped at now), open-run-by-id; main page with progress bar and tabs Sources, Financials (KPI line chart + latest-period table with formulas and missing inputs), Valuation, Scenarios (per-scenario fact / assumption / calculation table) and Report (review verdict, findings, Markdown report).
+- The primary workflow (search → create run → view results/report) and error display are tested headless with Streamlit `AppTest` against the real API and SQLite.
