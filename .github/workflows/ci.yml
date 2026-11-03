@@ -95,7 +95,13 @@ jobs:
       - name: Compose file is valid
         run: docker compose config --quiet
       - name: Build image
-        run: docker build -t equitydesk:ci .
+        run: |
+          set -o pipefail
+          if ! docker build --progress=plain -t equitydesk:ci . 2>&1 | tee build.log; then
+            # surface the failure as annotations (visible on the run page)
+            tail -n 25 build.log | while IFS= read -r line; do echo "::error title=docker build::${line}"; done
+            exit 1
+          fi
       - name: Health smoke (API /ready inside the container)
         run: |
           docker volume create equitydesk-ci-data
