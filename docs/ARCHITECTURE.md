@@ -553,3 +553,14 @@ Accepted findings carry the surviving evidence and the issue codes in `attribute
   - `thesis` claims added / removed;
   - `valuation` per-share points (multiples mid, DCF, each scenario, probability-weighted) old / new / delta, and `assumptions_changed` (assumption-set hashes that differ).
 - API: `POST /research-runs/{id}/refresh {as_of?}` → 201 new run; `GET /research-runs/{id}/diff?against={other_id}` (422 if the runs belong to different companies). The dashboard has a History tab (run list, refresh button, diff tables).
+
+### Watchlist, scheduled refresh and alert hooks (Task 6.4)
+
+- `domain/watchlist.WatchlistEntry` (company, `refresh_interval_hours` 1–2160, alert switches, `last_refresh_at` / `last_refresh_run_id`, `filings_seen_until`) and `Alert` (kind `new_filing` / `refresh_started` / `run_completed` / `run_needs_input`, company, run id, report id, `sources` = document id, type, official id, URL and publication time, message, delivery status).
+- `application/watchlist.WatchlistService.tick()` per active entry:
+  1. **new filings** — documents published after `filings_seen_until` (and not after now) raise one `new_filing` alert listing every document; the marker advances, so a filing is alerted once;
+  2. **due refresh** — when the interval has elapsed and no run of the company is actively in progress, the service claims the slot `company:interval:window` (`refresh_claims`, primary key → atomic `INSERT OR IGNORE`). Only the first claim starts a run (`start_run_for_company`: a refresh of the latest run, or a first run on the primary listing); concurrent schedulers, retries or double triggers get `skipped_duplicate`.
+- `run_finished(run_id)` is the hook for runs that reached `Completed` / `NeedsInput`; the alert references the run, its report and the cited snapshot documents.
+- Alerts are persisted first (insert-only, content-derived ids make every hook idempotent), then delivered through an `AlertSink`. `infrastructure/jobs/alerts.WebhookAlertSink` POSTs the alert JSON with an optional `Authorization: Bearer` token; URL and token come from `ALERT_WEBHOOK_URL` / `ALERT_WEBHOOK_TOKEN` (`SecretStr`), are never part of the alert and never appear in delivery errors, which are stored on the alert (`delivered`, `delivery_error`).
+- `infrastructure/jobs/scheduler` runs `tick()` every `EQUITYDESK_SCHEDULER_TICK_SECONDS` (`python -m equitydesk.infrastructure.jobs.scheduler [--once]`); a failing tick is logged and retried on the next tick.
+- SQLite schema v6: `watchlist`, `refresh_claims`, `alerts`. API: `GET /watchlist`, `PUT /watchlist/{company_id}`, `DELETE /watchlist/{company_id}`, `POST /watchlist/tick`, `GET /alerts?company_id=&limit=`.

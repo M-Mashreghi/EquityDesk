@@ -687,7 +687,7 @@ Allow new runs for later `as_of` dates and show what changed in sources, KPIs, g
 
 ### Task 6.4: Watchlist, Scheduled Refresh & Alert Hooks
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Add watchlist and configurable refresh scheduling/notifications for new filings or completed research runs.
@@ -701,10 +701,10 @@ Add watchlist and configurable refresh scheduling/notifications for new filings 
 
 **Definition of Done (DoD)**
 
-- [ ] Duplicate refreshes are guarded; alerts include run/source references; secrets stay external.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Duplicate refreshes are guarded; alerts include run/source references; secrets stay external.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -859,9 +859,9 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
 | 4 — LLM Research Intelligence | 5 | 5 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 5 |
-| 6 — API, Dashboard & Research Workflow Automation | 5 | 3 |
+| 6 — API, Dashboard & Research Workflow Automation | 5 | 4 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **28** |
+| **Total** | **35** | **29** |
 
 ## Change Log
 
@@ -896,3 +896,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-11-03 | Task 6.1 completed and verified |
 | 2026-11-03 | Task 6.2 completed and verified |
 | 2026-11-03 | Task 6.3 completed and verified |
+| 2026-11-03 | Task 6.4 completed and verified |

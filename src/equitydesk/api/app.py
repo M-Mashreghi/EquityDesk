@@ -13,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from equitydesk import __version__
 from equitydesk.application.research_service import ResearchService, ServiceError
 from equitydesk.application.resolver import ResolutionResult
+from equitydesk.application.watchlist import WatchlistService
 from equitydesk.domain.common import DomainError
 from equitydesk.domain.companies import Company
 from equitydesk.domain.documents import SourceDocument
@@ -20,6 +21,7 @@ from equitydesk.domain.financials import FinancialFact
 from equitydesk.domain.metrics import MetricResult
 from equitydesk.domain.research import ResearchRun
 from equitydesk.domain.valuation import ValuationRun
+from equitydesk.domain.watchlist import Alert, WatchlistEntry
 
 STATUS_BY_KIND = {"invalid_request": 422, "not_found": 404, "ambiguous": 409}
 
@@ -30,6 +32,14 @@ class CreateRunRequest(BaseModel):
     query: str = Field(min_length=1, max_length=200, description="ticker, CIK, ISIN or name")
     exchange: str | None = Field(default=None, max_length=8, description="MIC, e.g. XNAS")
     as_of: datetime | None = Field(default=None, description="timezone-aware; defaults to now")
+
+
+class WatchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    refresh_interval_hours: int = Field(default=24, ge=1, le=24 * 90)
+    alert_on_new_filing: bool = True
+    alert_on_run_finished: bool = True
 
 
 class RefreshRunRequest(BaseModel):
@@ -88,13 +98,22 @@ def _service(request: Request) -> ResearchService:
     return service
 
 
-# Module-level alias so FastAPI can resolve the (postponed) annotation.
+def _watchlist(request: Request) -> WatchlistService:
+    watchlist: WatchlistService | None = request.app.state.watchlist
+    if watchlist is None:
+        raise ServiceError("watchlist is not configured")
+    return watchlist
+
+
+# Module-level aliases so FastAPI can resolve the (postponed) annotations.
 Svc = Annotated[ResearchService, Depends(_service)]
+Watch = Annotated[WatchlistService, Depends(_watchlist)]
 
 
-def create_app(service: ResearchService) -> FastAPI:
+def create_app(service: ResearchService, watchlist: WatchlistService | None = None) -> FastAPI:
     app = FastAPI(title="EquityDesk Research API", version=__version__)
     app.state.service = service
+    app.state.watchlist = watchlist
 
     @app.exception_handler(ServiceError)
     async def _service_error(_: Request, exc: ServiceError) -> JSONResponse:
@@ -182,10 +201,38 @@ def create_app(service: ResearchService) -> FastAPI:
             review_passed=v.review.passed if v.review else None,
         )
 
+    @app.get("/watchlist", response_model=list[WatchlistEntry])
+    def watchlist_entries(w: Watch) -> list[WatchlistEntry]:
+        return w.entries()
+
+    @app.put("/watchlist/{company_id}", response_model=WatchlistEntry)
+    def watch(w: Watch, company_id: str, body: WatchRequest) -> WatchlistEntry:
+        return w.watch(company_id, body.refresh_interval_hours, body.alert_on_new_filing,
+                       body.alert_on_run_finished)  # fmt: skip
+
+    @app.delete("/watchlist/{company_id}", status_code=204)
+    def unwatch(w: Watch, company_id: str) -> None:
+        w.unwatch(company_id)
+
+    @app.post("/watchlist/tick")
+    def tick(w: Watch) -> dict[str, Any]:
+        result = w.tick()
+        return {
+            "refreshes": [vars(r) for r in result.refreshes],
+            "alerts": [a.model_dump(mode="json") for a in result.alerts],
+        }
+
+    @app.get("/alerts", response_model=list[Alert])
+    def alerts(
+        w: Watch, company_id: str | None = None, limit: Annotated[int, Query(ge=1, le=500)] = 100
+    ) -> list[Alert]:
+        return w.alerts(company_id, limit)
+
     return app
 
 
 def default_app() -> FastAPI:  # pragma: no cover - process entry point
     from equitydesk.bootstrap import build_container
 
-    return create_app(build_container().research)
+    container = build_container()
+    return create_app(container.research, container.watchlist)

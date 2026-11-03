@@ -9,7 +9,7 @@ Recommended services:
 - `equitydesk-api` — FastAPI application / research services
 - `equitydesk-ui` — Streamlit dashboard (may run in same image with separate command)
 - SQLite persistent volume
-- optional scheduled worker process after Phase 6
+- `equitydesk-scheduler` — watchlist scheduler (`python -m equitydesk.infrastructure.jobs.scheduler`); several instances are safe (refresh slots are claimed atomically)
 
 Avoid adding Redis/Postgres/queues until the workload requires them.
 
@@ -35,6 +35,7 @@ Settings are loaded by `equitydesk.config.load_settings()` from an optional `.en
 | `ALERT_WEBHOOK_URL` | — | secret; optional alert hook |
 | `ALERT_WEBHOOK_TOKEN` | — | secret; optional alert hook |
 | `EQUITYDESK_API_URL` | `http://localhost:8000` | dashboard only: base URL of the research API |
+| `EQUITYDESK_SCHEDULER_TICK_SECONDS` | `300` | watchlist scheduler tick (5–86400 s) |
 
 Logging: `equitydesk.logging_setup.configure_logging()` installs a JSON (or text) handler that redacts registered secret values, `Authorization`/API-key shapes, and secret-named dict keys. Every record carries `correlation_id` and `research_run_id` bound with `log_context()`.
 

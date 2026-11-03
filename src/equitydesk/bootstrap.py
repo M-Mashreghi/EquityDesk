@@ -7,8 +7,10 @@ from pathlib import Path
 
 from equitydesk.application.research_service import ResearchService
 from equitydesk.application.resolver import SecurityResolver
+from equitydesk.application.watchlist import AlertSink, WatchlistService
 from equitydesk.config import CONFIG_SCHEMA_VERSION, Settings, load_settings
 from equitydesk.infrastructure.db.sqlite import Repositories, open_database
+from equitydesk.infrastructure.jobs.alerts import WebhookAlertSink
 from equitydesk.infrastructure.sources.security_master import JsonSecurityMaster
 
 
@@ -18,6 +20,7 @@ class Container:
     repos: Repositories
     master: JsonSecurityMaster
     research: ResearchService
+    watchlist: WatchlistService
 
 
 def build_container(
@@ -38,4 +41,8 @@ def build_container(
         findings=repos.findings,
         config_version=CONFIG_SCHEMA_VERSION,
     )
-    return Container(settings, repos, master, service)
+    sink: AlertSink | None = None
+    if settings.alert_webhook_url is not None:
+        sink = WebhookAlertSink(settings.alert_webhook_url, settings.alert_webhook_token)
+    watchlist = WatchlistService(repos.watchlist, service, sink)
+    return Container(settings, repos, master, service, watchlist)

@@ -178,6 +178,29 @@ class ResearchService:
         self.runs.add_run(run)
         return run
 
+    def start_run_for_company(self, company_id: str, as_of: datetime | None = None) -> ResearchRun:
+        """New run for a known company: a refresh of its latest run if there is one."""
+        company = self.get_company(company_id)
+        previous = [r for r in self.runs.runs_for_company(company.company_id)]
+        if previous:
+            return self.refresh_run(previous[-1].research_run_id, as_of)
+        securities = self.companies.securities_for_company(company.company_id)
+        primary = next((x for x in securities if x.is_primary_listing), None)
+        now = self.clock()
+        as_of = as_of or now
+        if as_of > now:
+            raise InvalidRequest("as_of cannot be in the future", {"as_of": as_of.isoformat()})
+        run = ResearchRun(
+            research_run_id=new_id("run"),
+            company_id=company.company_id,
+            security_id=primary.security_id if primary else None,
+            as_of=as_of,
+            created_at=now,
+            config_version=self.config_version,
+        )
+        self.runs.add_run(run)
+        return run
+
     def run_state(self, research_run_id: str) -> RunState:
         run = self.get_run(research_run_id)
         reports = self.reports.reports_for_run(run.research_run_id)

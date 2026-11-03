@@ -54,6 +54,7 @@ ENV_KEYS: dict[str, str] = {
     "ALERT_WEBHOOK_URL": "alert_webhook_url",
     "ALERT_WEBHOOK_TOKEN": "alert_webhook_token",
     "EQUITYDESK_API_URL": "api_url",
+    "EQUITYDESK_SCHEDULER_TICK_SECONDS": "scheduler_tick_seconds",
 }
 
 
@@ -82,6 +83,9 @@ class Settings(BaseModel):
 
     # Base URL the dashboard uses to reach the research API.
     api_url: str = Field(default="http://localhost:8000", pattern=r"^https?://")
+
+    # Watchlist scheduler: seconds between ticks (refresh due-ness is per watchlist entry).
+    scheduler_tick_seconds: float = Field(default=300.0, ge=5, le=86_400)
 
     @model_validator(mode="after")
     def _cross_field_rules(self) -> Settings:

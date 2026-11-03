@@ -27,8 +27,9 @@ from equitydesk.domain.research import ResearchFinding, ResearchRun, ResearchSta
 from equitydesk.domain.review import ReviewFinding, ReviewGateError, ReviewResult
 from equitydesk.domain.snapshot import ResearchSnapshot
 from equitydesk.domain.valuation import ValuationRun
+from equitydesk.domain.watchlist import Alert, WatchlistEntry
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 M = TypeVar("M", bound=BaseModel)
 
@@ -167,6 +168,26 @@ CREATE TABLE IF NOT EXISTS review_findings (
     PRIMARY KEY (review_id, review_finding_id)
 );
 CREATE INDEX IF NOT EXISTS ix_review_findings_run ON review_findings(research_run_id, severity);
+
+-- v6: watchlist, refresh-slot claims (duplicate-refresh guard) and alerts.
+CREATE TABLE IF NOT EXISTS watchlist (
+    company_id TEXT PRIMARY KEY REFERENCES companies(company_id),
+    payload TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS refresh_claims (
+    slot TEXT PRIMARY KEY,
+    company_id TEXT NOT NULL,
+    claimed_at TEXT NOT NULL,
+    research_run_id TEXT
+);
+CREATE TABLE IF NOT EXISTS alerts (
+    alert_id TEXT PRIMARY KEY,
+    company_id TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    payload TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_alerts_company ON alerts(company_id, created_at);
 """
 
 
@@ -743,6 +764,76 @@ class SqliteReportRepository:
         return [ReviewFinding.model_validate_json(r["payload"]) for r in rows]
 
 
+class SqliteWatchlistRepository:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def save_entry(self, entry: WatchlistEntry) -> None:
+        self.db.conn.execute(
+            "INSERT INTO watchlist(company_id, payload) VALUES (?, ?) "
+            "ON CONFLICT(company_id) DO UPDATE SET payload=excluded.payload",
+            (entry.company_id, entry.model_dump_json()),
+        )
+
+    def get_entry(self, company_id: str) -> WatchlistEntry:
+        row = self.db.conn.execute(
+            "SELECT payload FROM watchlist WHERE company_id = ?", (company_id,)
+        ).fetchone()
+        return _load(WatchlistEntry, row, f"watchlist entry {company_id}")
+
+    def remove_entry(self, company_id: str) -> bool:
+        cur = self.db.conn.execute("DELETE FROM watchlist WHERE company_id = ?", (company_id,))
+        return cur.rowcount > 0
+
+    def list_entries(self) -> list[WatchlistEntry]:
+        rows = self.db.conn.execute("SELECT payload FROM watchlist ORDER BY company_id")
+        return [WatchlistEntry.model_validate_json(r["payload"]) for r in rows]
+
+    def claim_slot(self, slot: str, company_id: str, claimed_at: datetime) -> bool:
+        """Atomically claim a refresh slot; False if it was already claimed (duplicate)."""
+        cur = self.db.conn.execute(
+            "INSERT OR IGNORE INTO refresh_claims(slot, company_id, claimed_at) VALUES (?, ?, ?)",
+            (slot, company_id, ts(claimed_at)),
+        )
+        return cur.rowcount == 1
+
+    def attach_run(self, slot: str, research_run_id: str) -> None:
+        self.db.conn.execute(
+            "UPDATE refresh_claims SET research_run_id = ? WHERE slot = ?", (research_run_id, slot)
+        )
+
+    def add_alert(self, alert: Alert) -> bool:
+        """Insert-only; returns False if an alert with this id (dedupe key) already exists."""
+        cur = self.db.conn.execute(
+            "INSERT OR IGNORE INTO alerts(alert_id, company_id, kind, created_at, payload) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (alert.alert_id, alert.company_id, alert.kind.value, ts(alert.created_at),
+             alert.model_dump_json()),
+        )  # fmt: skip
+        return cur.rowcount == 1
+
+    def mark_delivery(self, alert_id: str, delivered: bool, error: str | None) -> None:
+        row = self.db.conn.execute(
+            "SELECT payload FROM alerts WHERE alert_id = ?", (alert_id,)
+        ).fetchone()
+        alert = _load(Alert, row, f"alert {alert_id}")
+        updated = alert.model_copy(update={"delivered": delivered, "delivery_error": error})
+        self.db.conn.execute(
+            "UPDATE alerts SET payload = ? WHERE alert_id = ?",
+            (updated.model_dump_json(), alert_id),
+        )
+
+    def alerts(self, company_id: str | None = None, limit: int = 100) -> list[Alert]:
+        sql = "SELECT payload FROM alerts"
+        params: list[Any] = []
+        if company_id is not None:
+            sql += " WHERE company_id = ?"
+            params.append(company_id)
+        sql += " ORDER BY created_at DESC, rowid DESC LIMIT ?"
+        params.append(limit)
+        return [Alert.model_validate_json(r["payload"]) for r in self.db.conn.execute(sql, params)]
+
+
 class Repositories:
     """Convenience bundle of all SQLite repositories sharing one connection."""
 
@@ -758,6 +849,7 @@ class Repositories:
         self.snapshots = SqliteSnapshotRepository(db)
         self.peer_sets = SqlitePeerSetRepository(db)
         self.reports = SqliteReportRepository(db)
+        self.watchlist = SqliteWatchlistRepository(db)
 
 
 def open_database(path: Path | str = ":memory:") -> Repositories:
