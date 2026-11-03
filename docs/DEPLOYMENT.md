@@ -59,7 +59,7 @@ Rebuildable/cache:
 - parsed intermediates that can be reproduced from retained raw inputs
 - temporary report exports
 
-The final implementation must document whether raw source documents are persisted or can be re-fetched without breaking reproducibility.
+Decision: raw source documents (`data/raw`, content-addressed) are persisted and backed up; reports never depend on re-fetching a document that an issuer may have changed or removed. See `docs/RUNBOOK.md` §9.
 
 ## 4. Docker
 
@@ -130,6 +130,11 @@ Updating dependencies: change the environment, run the full suite, then regenera
 
 ## 8. Backup
 
-At minimum back up SQLite and any durable source snapshot store required for report reproducibility.
+Back up the SQLite database and the raw source store (required for report reproducibility); the cache is rebuildable.
 
-A release is not production-ready until restore has been tested.
+```bash
+docker compose exec api python -m equitydesk.infrastructure.db.backup create --keep 14   # /data/backups
+docker compose exec api python -m equitydesk.infrastructure.db.backup verify /data/backups/equitydesk-<ts>.tar.gz
+```
+
+Run `create` daily from the host scheduler and copy archives off-host. Restore procedure: `docs/RUNBOOK.md` §8. A release is not production-ready until the restore drill passes (`tests/e2e/test_backup_restore.py`).

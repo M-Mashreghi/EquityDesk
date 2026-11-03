@@ -80,6 +80,7 @@ known-first-party = ["equitydesk", "factories"]
 "src/equitydesk/api/*.py" = ["E501"]
 "src/equitydesk/dashboard/*.py" = ["E501"]
 "src/equitydesk/bootstrap.py" = ["E501"]
+"src/equitydesk/infrastructure/db/backup.py" = ["E501"]
 "src/equitydesk/application/telemetry.py" = ["E501"]
 
 [tool.mypy]

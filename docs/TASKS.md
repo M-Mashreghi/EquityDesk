@@ -123,8 +123,8 @@ Update after every verified task.
 
 - [x] **Task 7.1** — Point-in-Time Leakage Audit & Reproducibility Suite
 - [x] **Task 7.2** — Observability, Cost Telemetry & Health Checks
-- [ ] **Task 7.3** — Dockerization & Production Configuration
-- [ ] **Task 7.4** — GitHub Actions CI/CD & Release Workflow
+- [x] **Task 7.3** — Dockerization & Production Configuration
+- [x] **Task 7.4** — GitHub Actions CI/CD & Release Workflow
 - [ ] **Task 7.5** — Backup, Restore & Operational Runbook
 
 ### Verification — Phase 7
@@ -203,3 +203,7 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 7.1** (2026-11-03): 15-vector leakage matrix across snapshot, SEC index, workflow, mapper, API, market, peers, gate, composer, schema, reviewer, runs and history; frozen offline AAPL run compared against documented golden values (tests/fixtures/reproducibility). Shared E2E setup moved to tests/e2e_support.py. 377 tests passed; ruff + mypy clean.
 
 - **Task 7.2** (2026-11-03): Per-run telemetry (stage timings, LLM tokens/cost from configured prices only, source/parser/finding counters) persisted (schema v7) and exposed; run-scoped log correlation; request correlation middleware + access log; /healthz, /ready (DB schema + data dir, 503 on failure), /health/detailed without secret values; secret-scrubbing tests. 381 tests passed; ruff + mypy clean.
+
+- **Task 7.3** (2026-11-03): Non-root multi-stage image (constraints-pinned, /data volume, read-only rootfs, HEALTHCHECK via python probe on /ready), compose with api/dashboard/scheduler, host-local ports, .env at runtime, configurable security master path; static deployment tests. Verified in GitHub Actions: compose config, docker build, container /ready, /healthz, /health/detailed, non-root user and Docker health 'healthy' (run on 1acbc1e). Two build bugs found by CI and fixed (compose interpolation of $(...), literal \n in ENV).
+
+- **Task 7.4** (2026-11-03): CI: ruff, format, mypy strict, leakage+golden suite, full pytest (3.14 pinned), pytest on 3.12, pip-audit + secret scan, image build + health smoke; release on vX.Y.Z reuses CI as gate, checks tag vs pyproject, publishes GHCR image + GitHub release; read-only default permissions, write only in publish job, GITHUB_TOKEN only. streamlit 1.66.1 / pillow 13.0.0 / certifi 2026.10.18 to clear pip-audit findings. All CI jobs green on 1acbc1e.

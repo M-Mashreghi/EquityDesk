@@ -783,7 +783,7 @@ Add structured logs, stage timing, LLM token/cost metadata, source/parser metric
 
 ### Task 7.3: Dockerization & Production Configuration
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Create non-root container, Compose config, persistent data/cache mounts, env template, and health checks.
@@ -797,16 +797,16 @@ Create non-root container, Compose config, persistent data/cache mounts, env tem
 
 **Definition of Done (DoD)**
 
-- [ ] docker compose config/build succeeds; health smoke documented.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] docker compose config/build succeeds; health smoke documented.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
 ### Task 7.4: GitHub Actions CI/CD & Release Workflow
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Run lint/type/tests/security checks on PRs and build versioned images/releases only after quality gates.
@@ -820,10 +820,10 @@ Run lint/type/tests/security checks on PRs and build versioned images/releases o
 
 **Definition of Done (DoD)**
 
-- [ ] Failed quality blocks publish; secrets/permissions follow least privilege.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Failed quality blocks publish; secrets/permissions follow least privilege.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -860,8 +860,8 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 4 — LLM Research Intelligence | 5 | 5 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 5 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 5 |
-| 7 — Hardening, CI/CD & Operations | 5 | 2 |
-| **Total** | **35** | **32** |
+| 7 — Hardening, CI/CD & Operations | 5 | 4 |
+| **Total** | **35** | **34** |
 
 ## Change Log
 
@@ -900,3 +900,5 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-11-03 | Task 6.5 completed and verified |
 | 2026-11-03 | Task 7.1 completed and verified |
 | 2026-11-03 | Task 7.2 completed and verified |
+| 2026-11-03 | Task 7.3 completed and verified |
+| 2026-11-03 | Task 7.4 completed and verified |

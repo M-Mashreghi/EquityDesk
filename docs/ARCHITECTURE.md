@@ -612,3 +612,18 @@ Reproducibility: a frozen, fully offline AAPL run (SEC fixtures, scripted LLM, f
 - API middleware: honours a safe incoming `X-Correlation-ID` (`[A-Za-z0-9._-]{1,64}`, otherwise a new id), binds it to every log record of the request, logs an access line (method, path, status, duration) and echoes the header.
 - Probes: `GET /healthz` (liveness), `GET /ready` (database answers with the expected schema version and the data directory is writable; 503 with per-check detail otherwise), `GET /health/detailed` (environment, schema / security-master versions, LLM provider and model, whether secrets are configured — never their values —, SEC rate limit, webhook configured, watchlist size).
 - All of it goes through the existing scrubbing log handler; tests assert API keys, webhook URLs and bearer tokens never appear in logs or diagnostics.
+
+### Dockerization and production configuration (Task 7.3)
+
+One non-root image (uid 10001, multi-stage, `constraints.txt`-pinned, `/data` volume, read-only root filesystem, `HEALTHCHECK` via `python -m equitydesk.healthcheck` against `/ready`) runs the API, dashboard and scheduler (`docker-compose.yml`, host-local ports, `.env` at runtime, no secrets in the image). The security master path is configurable (`EQUITYDESK_SECURITY_MASTER_PATH`). Details and the health smoke: `docs/DEPLOYMENT.md` §4.
+
+### CI/CD and release workflow (Task 7.4)
+
+`.github/workflows/ci.yml` (quality on pinned Python 3.14, compatibility on Python 3.12, `pip-audit` + secret scan, then image build and container health smoke) and `.github/workflows/release.yml` (tag `vX.Y.Z` → the full CI as a gate → version check → GHCR image + GitHub release; write permissions only in the publish job). Details: `docs/DEPLOYMENT.md` §5.
+
+### Backup, restore and operational runbook (Task 7.5)
+
+- `infrastructure/db/backup.py`: `create_backup(db, out_dir, raw_root)` takes an online-consistent copy with SQLite's backup API and writes `equitydesk-<UTC>.tar.gz` with the database, the content-addressed raw store and `manifest.json` (format, creation time, app and schema version, row counts per table, SHA-256 per file). `verify_backup` rejects unsafe members (absolute paths, `..`, links), checks every hash, `PRAGMA integrity_check`, row counts and schema compatibility. `restore_backup` verifies first and moves an existing database / raw store to `*.pre-restore-<timestamp>` instead of deleting it. `prune_backups(keep=N)` applies retention. CLI: `python -m equitydesk.infrastructure.db.backup create [--keep N] [--no-raw] | verify ARCHIVE | restore ARCHIVE [--db] [--raw]`.
+- Raw-cache policy: `data/raw` is persistent and backed up (reproducibility does not depend on issuers keeping documents online); `data/cache` and parsed intermediates are rebuildable and excluded.
+- The restore drill (`tests/e2e/test_backup_restore.py`) backs up a store holding a completed research run, restores it to a new location and proves the run, report, review, telemetry, hash-verified raw sources and the API report endpoint are identical; corrupted, mismatched and path-traversal archives are refused without touching the target.
+- `docs/RUNBOOK.md` covers health diagnostics, stuck/failed runs, source and LLM outages, review-gate blocks, point-in-time incidents, calculation/valuation mismatches, restore, raw/cache policy, secret exposure, scheduler/alerts, reproducibility and the release checklist with rollback.
