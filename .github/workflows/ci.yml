@@ -99,8 +99,7 @@ jobs:
           set -o pipefail
           if ! docker build --progress=plain -t equitydesk:ci . 2>&1 | tee build.log; then
             # surface the failure as annotations (visible on the run page)
-            msg="$(grep -v '^#[0-9]* sha256' build.log | tail -n 40 | sed ':a;N;$!ba;s/%/%25/g;s//%0D/g;s/
-/%0A/g')"
+            msg="$(grep -v ' sha256:' build.log | tail -n 40 | python3 -c 'import sys; print(sys.stdin.read().replace("%", "%25").replace(chr(13), "%0D").replace(chr(10), "%0A"))')"
             echo "::error title=docker build::${msg}"
             exit 1
           fi
