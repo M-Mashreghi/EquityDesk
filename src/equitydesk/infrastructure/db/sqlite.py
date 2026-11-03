@@ -22,11 +22,13 @@ from equitydesk.domain.documents import SourceDocument
 from equitydesk.domain.financials import FinancialFact
 from equitydesk.domain.normalized import NormalizedDocument
 from equitydesk.domain.peers import PeerSet
-from equitydesk.domain.research import ResearchFinding, ResearchRun
+from equitydesk.domain.report import ResearchReport
+from equitydesk.domain.research import ResearchFinding, ResearchRun, ResearchStatus
+from equitydesk.domain.review import ReviewFinding, ReviewGateError, ReviewResult
 from equitydesk.domain.snapshot import ResearchSnapshot
 from equitydesk.domain.valuation import ValuationRun
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 M = TypeVar("M", bound=BaseModel)
 
@@ -137,6 +139,34 @@ CREATE TABLE IF NOT EXISTS peer_sets (
     payload TEXT NOT NULL,
     PRIMARY KEY (name, version)
 );
+
+-- v5: composed reports and independent reviews (insert-only).
+CREATE TABLE IF NOT EXISTS research_reports (
+    report_id TEXT PRIMARY KEY,
+    research_run_id TEXT NOT NULL REFERENCES research_runs(research_run_id),
+    schema_version TEXT NOT NULL,
+    payload TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_reports_run ON research_reports(research_run_id);
+CREATE TABLE IF NOT EXISTS reviews (
+    review_id TEXT PRIMARY KEY,
+    research_run_id TEXT NOT NULL REFERENCES research_runs(research_run_id),
+    report_id TEXT NOT NULL REFERENCES research_reports(report_id),
+    passed INTEGER NOT NULL,
+    reviewed_at TEXT NOT NULL,
+    payload TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_reviews_run ON reviews(research_run_id, reviewed_at);
+CREATE TABLE IF NOT EXISTS review_findings (
+    review_id TEXT NOT NULL REFERENCES reviews(review_id),
+    review_finding_id TEXT NOT NULL,
+    research_run_id TEXT NOT NULL,
+    code TEXT NOT NULL,
+    severity TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    PRIMARY KEY (review_id, review_finding_id)
+);
+CREATE INDEX IF NOT EXISTS ix_review_findings_run ON review_findings(research_run_id, severity);
 """
 
 
@@ -296,6 +326,17 @@ class SqliteResearchRunRepository:
         identity = ("company_id", "security_id", "as_of", "created_at", "config_version")
         if any(getattr(current, f) != getattr(run, f) for f in identity):
             raise ImmutableRecordError("research run identity fields cannot change")
+        if run.status is ResearchStatus.COMPLETED:
+            # Review gate: only a run whose latest review passed may be completed.
+            row = self.db.conn.execute(
+                "SELECT passed FROM reviews WHERE research_run_id = ? "
+                "ORDER BY reviewed_at DESC, rowid DESC LIMIT 1",
+                (run.research_run_id,),
+            ).fetchone()
+            if row is None or not row["passed"]:
+                raise ReviewGateError(
+                    f"research run {run.research_run_id} has no passing review; cannot complete"
+                )
         self.db.conn.execute(
             "UPDATE research_runs SET status = ?, payload = ? WHERE research_run_id = ?",
             (run.status.value, run.model_dump_json(), run.research_run_id),
@@ -615,6 +656,86 @@ class SqlitePeerSetRepository:
         return [PeerSet.model_validate_json(r["payload"]) for r in rows]
 
 
+class SqliteReportRepository:
+    """Reports and reviews are insert-only; a re-review is a new review record."""
+
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def add_report(self, report: ResearchReport) -> None:
+        _insert_immutable(
+            self.db,
+            "research_reports",
+            "report_id",
+            {
+                "report_id": report.report_id,
+                "research_run_id": report.research_run_id,
+                "schema_version": report.schema_version,
+                "payload": report.model_dump_json(),
+            },
+            "report",
+        )
+
+    def get_report(self, report_id: str) -> ResearchReport:
+        row = self.db.conn.execute(
+            "SELECT payload FROM research_reports WHERE report_id = ?", (report_id,)
+        ).fetchone()
+        return _load(ResearchReport, row, f"report {report_id}")
+
+    def reports_for_run(self, research_run_id: str) -> list[ResearchReport]:
+        rows = self.db.conn.execute(
+            "SELECT payload FROM research_reports WHERE research_run_id = ? ORDER BY rowid",
+            (research_run_id,),
+        )
+        return [ResearchReport.model_validate_json(r["payload"]) for r in rows]
+
+    def add_review(self, review: ReviewResult) -> None:
+        with self.db.transaction():
+            _insert_immutable(
+                self.db,
+                "reviews",
+                "review_id",
+                {
+                    "review_id": review.review_id,
+                    "research_run_id": review.research_run_id,
+                    "report_id": review.report_id,
+                    "passed": int(review.passed),
+                    "reviewed_at": ts(review.reviewed_at),
+                    "payload": review.model_dump_json(),
+                },
+                "review",
+            )
+            self.db.conn.executemany(
+                "INSERT OR IGNORE INTO review_findings(review_id, review_finding_id, "
+                "research_run_id, code, severity, payload) VALUES (?, ?, ?, ?, ?, ?)",
+                [
+                    (
+                        review.review_id,
+                        f.review_finding_id,
+                        review.research_run_id,
+                        f.code,
+                        f.severity.value,
+                        f.model_dump_json(),
+                    )
+                    for f in review.findings
+                ],
+            )
+
+    def latest_review(self, research_run_id: str) -> ReviewResult | None:
+        row = self.db.conn.execute(
+            "SELECT payload FROM reviews WHERE research_run_id = ? "
+            "ORDER BY reviewed_at DESC, rowid DESC LIMIT 1",
+            (research_run_id,),
+        ).fetchone()
+        return ReviewResult.model_validate_json(row["payload"]) if row else None
+
+    def review_findings(self, review_id: str) -> list[ReviewFinding]:
+        rows = self.db.conn.execute(
+            "SELECT payload FROM review_findings WHERE review_id = ? ORDER BY rowid", (review_id,)
+        )
+        return [ReviewFinding.model_validate_json(r["payload"]) for r in rows]
+
+
 class Repositories:
     """Convenience bundle of all SQLite repositories sharing one connection."""
 
@@ -629,6 +750,7 @@ class Repositories:
         self.normalized = SqliteNormalizedDocumentRepository(db)
         self.snapshots = SqliteSnapshotRepository(db)
         self.peer_sets = SqlitePeerSetRepository(db)
+        self.reports = SqliteReportRepository(db)
 
 
 def open_database(path: Path | str = ":memory:") -> Repositories:

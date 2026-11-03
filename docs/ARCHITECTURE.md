@@ -485,3 +485,30 @@ Accepted findings carry the surviving evidence and the issue codes in `attribute
   - `ThesisPoint`s (statement, stance for/against, referenced finding / metric / valuation ids) become inference claims only when at least one reference resolves; points without support move to open questions as unknown claims. References to rejected or unknown objects are noted.
   - Empty sections carry an explicit note. The report id is content-derived (deterministic).
 - `reporting/render.render_markdown(report)` renders labeled claims with numbered citations, metric ids and valuation ids, plus a source list with locators and quotes.
+
+### Independent reviewer / contradiction & completeness gate (Task 5.5)
+
+`reporting/reviewer.review_report(report, documents, metrics, valuations, snapshot_document_ids, llm_reviewer)` re-checks a composed report against the objects it claims to rest on and returns a `domain/review.ReviewResult` (deterministic `review_id`, reviewer version, `ReviewFinding`s with code, severity, message, claim / citation ids, origin). The reviewer never rewrites a claim.
+
+| Code | Severity | Check |
+|---|---|---|
+| `missing_critical_section` | blocking | overview, financial analysis, valuation, thesis and risks need non-unknown content |
+| `empty_section` | warning | other sections empty |
+| `unsupported_claim` | blocking | fact/inference (outside open questions) without citation, metric or valuation link |
+| `uncertain_claim` | warning | linked but uncertain / not supported |
+| `unsupported_consensus` | blocking | consensus / street-estimate wording without a cited source |
+| `unknown_source`, `future_source`, `citation_outside_snapshot`, `citation_provenance_mismatch` | blocking | citation document unknown, published after `as_of`, not a snapshot member, or hash / timestamp / official id differ from the stored document |
+| `superseded_source` | warning | cited document amended or superseded by a document visible at `as_of` |
+| `stale_sources` | warning | newest primary citation older than 400 days at `as_of` |
+| `untraceable_metric`, `untraceable_valuation` | blocking | linked id not among the run's metric results / valuation records |
+| `calculation_mismatch` | blocking | a value quoted in a claim differs from the linked metric value or is not an output of the linked valuation |
+| `text_calculation_mismatch` | blocking | the claim text does not state the computed value |
+| `number_not_in_evidence` | blocking | a number in prose that is neither in a cited quote nor linked to a calculation |
+| `scenario_inconsistent` | blocking | a scenario valuation record carries blocking consistency issues |
+| `contradictory_values` | blocking | the same metric is stated with different values |
+| `contradictory_thesis_evidence` | warning | one finding is evidence both for and against the thesis |
+| `llm_contradiction` | warning | optional LLM pass (`report_contradiction_review@1.0.0`, schema `contradiction_review.v1`) flags a claim pair; only existing claim ids with confidence ≥ 0.5 are kept; LLM output can never block |
+| `llm_invalid_reference`, `llm_review_unavailable` | info | LLM referenced unknown claims / the LLM call failed |
+
+- `apply_review(run, review)` moves a `Reviewing` run to `Completed` when there are no blocking findings, otherwise to `NeedsInput` with the blocking codes as the reason.
+- Persistence (SQLite schema v5, insert-only): `research_reports`, `reviews` and `review_findings` (`SqliteReportRepository`). `SqliteResearchRunRepository.update_run` independently refuses to store a `Completed` run unless the run's latest review passed (`ReviewGateError`), so blocking findings cannot be bypassed.

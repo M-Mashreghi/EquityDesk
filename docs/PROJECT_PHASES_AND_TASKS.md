@@ -495,7 +495,7 @@ Validate source spans, snapshot membership, citation locators, confidence rules 
 
 ## Phase 5: Valuation, Scenarios, Thesis & Report Review
 
-**Status:** `[-]` In Progress
+**Status:** `[x]` Completed
 
 ### Task 5.1: Peer Comparison & Multiples Valuation
 
@@ -591,7 +591,7 @@ Compose company overview, financial analysis, valuation, thesis, risks, catalyst
 
 ### Task 5.5: Independent Reviewer / Contradiction & Completeness Gate
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Run deterministic and LLM-assisted review for unsupported claims, contradictions, stale/future sources, calculation-text mismatch and missing critical sections.
@@ -605,10 +605,10 @@ Run deterministic and LLM-assisted review for unsupported claims, contradictions
 
 **Definition of Done (DoD)**
 
-- [ ] Blocking errors prevent Completed status; reviewer findings are persisted and test-covered.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Blocking errors prevent Completed status; reviewer findings are persisted and test-covered.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -858,10 +858,10 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 5 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
 | 4 — LLM Research Intelligence | 5 | 5 |
-| 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 4 |
+| 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 5 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **24** |
+| **Total** | **35** | **25** |
 
 ## Change Log
 
@@ -892,3 +892,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-11-03 | Task 5.2 completed and verified |
 | 2026-11-03 | Task 5.3 completed and verified |
 | 2026-11-03 | Task 5.4 completed and verified |
+| 2026-11-03 | Task 5.5 completed and verified |
