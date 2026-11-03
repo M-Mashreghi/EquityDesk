@@ -64,6 +64,7 @@ known-first-party = ["equitydesk", "factories"]
 "src/equitydesk/analytics/scenarios.py" = ["E501"]
 "src/equitydesk/application/llm.py" = ["E501"]
 "src/equitydesk/application/research/*.py" = ["E501"]
+"src/equitydesk/reporting/*.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"

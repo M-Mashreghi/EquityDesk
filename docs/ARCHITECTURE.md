@@ -473,3 +473,15 @@ Accepted findings carry the surviving evidence and the issue codes in `attribute
 | `terminal_value_dominates` | warning | PV of terminal value > 85% of EV |
 
 - A probability-weighted value is computed only when every case has a probability and the probabilities are valid. `to_valuation_run()` persists facts, price, every case's assumptions (with hash, probability, narrative), labeled outputs and issues (`method=scenario`).
+
+### Investment thesis and cited report composer (Task 5.4)
+
+- Report schema `report.v1` (`domain/report.py`): `ResearchReport` (run, company, `as_of`, snapshot, composer version, sections, citations) → `ReportSection` in a fixed order (`company_overview`, `financial_analysis`, `guidance_and_strategy`, `valuation`, `investment_thesis`, `risks`, `catalysts`, `scenarios`, `open_questions`) → `ReportClaim` (`claim_type` fact / inference / assumption / unknown, `support_status`, `citation_ids`, `metric_ids`, `valuation_ids`, `finding_ids`, `assumption_source`, and the `values` quoted in the text). Schema invariants: a supported fact/inference must have a citation, metric id or valuation id; an unknown claim can never be supported; an assumption names its source; cited citations must exist; no citation may be published after `as_of`.
+- `Citation` carries full provenance: document id, source type, document type, title, URL / official id, published / retrieved timestamps, content hash, chunk locator, section, page and verbatim quote. Citation ids are content-derived.
+- `reporting/composer.compose_report(run, company, documents, findings, metrics, valuations, thesis)` only assembles validated objects (it computes no financial numbers):
+  - quality-gated findings → overview / guidance & strategy / risks / catalysts / open questions, evidence spans → citations (a document published after `as_of` raises `FutureLeakageError`);
+  - latest-period `MetricResult`s → fact claims linked by `metric_id` (unavailable metrics become explicit unknown claims naming the missing inputs);
+  - persisted `ValuationRun`s → multiples ranges, DCF summary (always stated as an assumption-driven estimate, not a price target) and per-scenario assumption + calculation claims, probability-weighted value and scenario-check notes, all linked by `valuation_id`;
+  - `ThesisPoint`s (statement, stance for/against, referenced finding / metric / valuation ids) become inference claims only when at least one reference resolves; points without support move to open questions as unknown claims. References to rejected or unknown objects are noted.
+  - Empty sections carry an explicit note. The report id is content-derived (deterministic).
+- `reporting/render.render_markdown(report)` renders labeled claims with numbered citations, metric ids and valuation ids, plus a source list with locators and quotes.

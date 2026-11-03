@@ -90,7 +90,7 @@ Update after every verified task.
 - [x] **Task 5.1** — Peer Comparison & Multiples Valuation
 - [x] **Task 5.2** — DCF / Intrinsic Scenario Engine
 - [x] **Task 5.3** — Bull / Base / Bear Scenario Builder
-- [ ] **Task 5.4** — Investment Thesis & Cited Research Report Composer
+- [x] **Task 5.4** — Investment Thesis & Cited Research Report Composer
 - [ ] **Task 5.5** — Independent Reviewer / Contradiction & Completeness Gate
 
 ### Verification — Phase 5
@@ -185,3 +185,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 5.2** (2026-11-03): Versioned DcfAssumptions (model-authored sets rejected), FCFF forecast, Gordon/exit-multiple TV, end/mid-year discounting, EV->equity->per-share bridge, WACC x terminal sensitivity grid; hand-worked two-year fixture. 305 tests passed; ruff + mypy clean.
 
 - **Task 5.3** (2026-11-03): ScenarioCase (bull/base/bear) on shared reported base facts; every value labeled fact/assumption/calculation with provenance; blocking checks (complete set, documented assumptions, horizon, probabilities, value ordering) and warnings; probability-weighted value; traceable scenario ValuationRun. 312 tests passed; ruff + mypy clean.
+
+- **Task 5.4** (2026-11-03): Stable report.v1 schema (fixed sections, labeled claims, provenance invariants), deterministic composer from gated findings/metrics/valuation runs/thesis points with full-provenance citations, metric/valuation id links, unsupported thesis points demoted to open questions; Markdown renderer. 320 tests passed; ruff + mypy clean.

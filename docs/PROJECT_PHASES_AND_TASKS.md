@@ -568,7 +568,7 @@ Combine explicit assumptions with deterministic models to produce scenario opera
 
 ### Task 5.4: Investment Thesis & Cited Research Report Composer
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Compose company overview, financial analysis, valuation, thesis, risks, catalysts, scenarios and open questions from validated objects.
@@ -582,10 +582,10 @@ Compose company overview, financial analysis, valuation, thesis, risks, catalyst
 
 **Definition of Done (DoD)**
 
-- [ ] Material facts have citations/provenance; calculations link to metric IDs; report schema stable.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Material facts have citations/provenance; calculations link to metric IDs; report schema stable.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -858,10 +858,10 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 5 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
 | 4 — LLM Research Intelligence | 5 | 5 |
-| 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 3 |
+| 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 4 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **23** |
+| **Total** | **35** | **24** |
 
 ## Change Log
 
@@ -891,3 +891,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-11-03 | Task 5.1 completed and verified |
 | 2026-11-03 | Task 5.2 completed and verified |
 | 2026-11-03 | Task 5.3 completed and verified |
+| 2026-11-03 | Task 5.4 completed and verified |
