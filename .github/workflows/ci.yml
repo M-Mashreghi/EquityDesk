@@ -99,7 +99,9 @@ jobs:
           set -o pipefail
           if ! docker build --progress=plain -t equitydesk:ci . 2>&1 | tee build.log; then
             # surface the failure as annotations (visible on the run page)
-            tail -n 25 build.log | while IFS= read -r line; do echo "::error title=docker build::${line}"; done
+            msg="$(grep -v '^#[0-9]* sha256' build.log | tail -n 40 | sed ':a;N;$!ba;s/%/%25/g;s//%0D/g;s/
+/%0A/g')"
+            echo "::error title=docker build::${msg}"
             exit 1
           fi
       - name: Health smoke (API /ready inside the container)
