@@ -125,16 +125,16 @@ Update after every verified task.
 - [x] **Task 7.2** — Observability, Cost Telemetry & Health Checks
 - [x] **Task 7.3** — Dockerization & Production Configuration
 - [x] **Task 7.4** — GitHub Actions CI/CD & Release Workflow
-- [ ] **Task 7.5** — Backup, Restore & Operational Runbook
+- [x] **Task 7.5** — Backup, Restore & Operational Runbook
 
 ### Verification — Phase 7
 
 | Item | Detail |
 |---|---|
-| Status | Not Started |
-| Tests | — |
-| Docs | — |
-| Notes | — |
+| Status | Completed |
+| Tests | `pytest`: 392 passed locally; GitHub Actions green (quality 3.14, compatibility 3.12, pip-audit + secret scan, image build + container health smoke) |
+| Docs | ARCHITECTURE.md contracts 7.1–7.5; DEPLOYMENT.md Docker/CI/backup; RUNBOOK.md rewritten; reproducibility fixture README |
+| Notes | SQLite schema v7; Docker is not installed on the dev machine, so the image is verified in CI only |
 
 ## Project Verification Log
 
@@ -207,3 +207,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 7.3** (2026-11-03): Non-root multi-stage image (constraints-pinned, /data volume, read-only rootfs, HEALTHCHECK via python probe on /ready), compose with api/dashboard/scheduler, host-local ports, .env at runtime, configurable security master path; static deployment tests. Verified in GitHub Actions: compose config, docker build, container /ready, /healthz, /health/detailed, non-root user and Docker health 'healthy' (run on 1acbc1e). Two build bugs found by CI and fixed (compose interpolation of $(...), literal \n in ENV).
 
 - **Task 7.4** (2026-11-03): CI: ruff, format, mypy strict, leakage+golden suite, full pytest (3.14 pinned), pytest on 3.12, pip-audit + secret scan, image build + health smoke; release on vX.Y.Z reuses CI as gate, checks tag vs pyproject, publishes GHCR image + GitHub release; read-only default permissions, write only in publish job, GITHUB_TOKEN only. streamlit 1.66.1 / pillow 13.0.0 / certifi 2026.10.18 to clear pip-audit findings. All CI jobs green on 1acbc1e.
+
+- **Task 7.5** (2026-11-03): Online-consistent SQLite + raw-store backups with manifest (hashes, row counts, schema), verification (integrity_check, traversal-safe), restore that moves existing data aside, retention, CLI; restore drill on a completed fixture run; RUNBOOK rewritten for critical incidents and release/rollback; raw-cache policy documented. 392 tests passed; ruff + mypy clean.

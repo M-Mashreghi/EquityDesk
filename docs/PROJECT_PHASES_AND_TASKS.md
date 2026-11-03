@@ -733,7 +733,7 @@ Prove ticker → sources → financials → LLM findings → valuation → revie
 
 ## Phase 7: Hardening, CI/CD & Operations
 
-**Status:** `[-]` In Progress
+**Status:** `[x]` Completed
 
 ### Task 7.1: Point-in-Time Leakage Audit & Reproducibility Suite
 
@@ -829,7 +829,7 @@ Run lint/type/tests/security checks on PRs and build versioned images/releases o
 
 ### Task 7.5: Backup, Restore & Operational Runbook
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Back up SQLite/research metadata, document raw-cache policy, restore drill, provider outage procedures and release checklist.
@@ -843,10 +843,10 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 
 **Definition of Done (DoD)**
 
-- [ ] Restore drill succeeds on fixture backup; RUNBOOK covers critical incidents; Phase 7 closes.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Restore drill succeeds on fixture backup; RUNBOOK covers critical incidents; Phase 7 closes.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -860,8 +860,8 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 4 — LLM Research Intelligence | 5 | 5 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 5 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 5 |
-| 7 — Hardening, CI/CD & Operations | 5 | 4 |
-| **Total** | **35** | **34** |
+| 7 — Hardening, CI/CD & Operations | 5 | 5 |
+| **Total** | **35** | **35** |
 
 ## Change Log
 
@@ -902,3 +902,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-11-03 | Task 7.2 completed and verified |
 | 2026-11-03 | Task 7.3 completed and verified |
 | 2026-11-03 | Task 7.4 completed and verified |
+| 2026-11-03 | Task 7.5 completed and verified |
