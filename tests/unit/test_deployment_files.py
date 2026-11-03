@@ -24,6 +24,9 @@ def test_image_runs_as_non_root_with_healthcheck() -> None:
     assert users and users[-1] not in {"root", "0"}
     assert "useradd --system --uid 10001" in DOCKERFILE
     assert re.search(r"^HEALTHCHECK .*\n\s+CMD .*equitydesk.healthcheck", DOCKERFILE, re.M)
+    assert chr(92) + "n" not in DOCKERFILE  # no literal escape sequences in instructions
+    assert all(line.rstrip().endswith(chr(92)) for line in DOCKERFILE.split("ENV ", 1)[1].split("
+")[:7])
     assert 'VOLUME ["/data"]' in DOCKERFILE and "-c constraints.txt" in DOCKERFILE
 
 

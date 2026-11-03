@@ -19,7 +19,8 @@ ENV PATH=/opt/venv/bin:$PATH \
     EQUITYDESK_ENV=production \
     EQUITYDESK_DATA_DIR=/data \
     EQUITYDESK_DB_PATH=/data/equitydesk.db \
-    EQUITYDESK_CACHE_DIR=/data/cache \n    EQUITYDESK_SECURITY_MASTER_PATH=/app/data/fixtures/security_master.json
+    EQUITYDESK_CACHE_DIR=/data/cache \
+    EQUITYDESK_SECURITY_MASTER_PATH=/app/data/fixtures/security_master.json
 RUN groupadd --system --gid 10001 equitydesk \
  && useradd --system --uid 10001 --gid equitydesk --home-dir /app --shell /usr/sbin/nologin equitydesk \
  && mkdir -p /data /app/data/fixtures \
