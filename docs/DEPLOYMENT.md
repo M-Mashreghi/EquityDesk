@@ -23,6 +23,7 @@ Settings are loaded by `equitydesk.config.load_settings()` from an optional `.en
 | `EQUITYDESK_DB_PATH` | `data/equitydesk.db` | SQLite system of record |
 | `EQUITYDESK_DATA_DIR` | `data` | raw source snapshots live under `data/raw` |
 | `EQUITYDESK_CACHE_DIR` | `data/cache` | rebuildable |
+| `EQUITYDESK_SECURITY_MASTER_PATH` | repository `data/fixtures/security_master.json` | curated security master JSON (set in the image) |
 | `EQUITYDESK_LOG_LEVEL` | `INFO` | |
 | `EQUITYDESK_LOG_FORMAT` | `json` | `json` or `text`; both are secret-scrubbed |
 | `SEC_USER_AGENT` | — | required in production; must contain a contact e-mail |
@@ -60,22 +61,39 @@ Rebuildable/cache:
 
 The final implementation must document whether raw source documents are persisted or can be re-fetched without breaking reproducibility.
 
-## 4. Docker Requirements
+## 4. Docker
 
-- Python 3.12+ base
-- non-root runtime user
-- locked/pinned dependencies
-- health endpoint for API
-- explicit persistent data mount
-- no secret copied into image
-- graceful shutdown for in-flight research runs where feasible
+One image (`Dockerfile`) serves all three processes; `docker-compose.yml` runs them:
 
-Example startup shape:
+| Service | Command | Port (host-local only) | Health |
+|---|---|---|---|
+| `api` | `uvicorn equitydesk.api.app:default_app --factory` (30 s graceful shutdown) | `127.0.0.1:8000` | `python -m equitydesk.healthcheck http://127.0.0.1:8000/ready` |
+| `dashboard` | `streamlit run …/equitydesk/dashboard/app.py` with `EQUITYDESK_API_URL=http://api:8000` | `127.0.0.1:8501` | `/_stcore/health` via the same probe |
+| `scheduler` | `python -m equitydesk.infrastructure.jobs.scheduler` | — | — |
+
+Image properties:
+
+- multi-stage build on `python:3.14-slim`; dependencies installed into `/opt/venv` with `pip install -c constraints.txt` (versions of the verified environment);
+- non-root runtime user `equitydesk` (uid/gid 10001), `no-new-privileges`, read-only root filesystem with `/tmp` as tmpfs;
+- persistent data only in the named volume `equitydesk-data` mounted at `/data` (`EQUITYDESK_DATA_DIR`, `EQUITYDESK_DB_PATH=/data/equitydesk.db`, raw store `/data/raw`, cache `/data/cache`, prices `/data/market/observations.json`); the security master is baked in at `/app/data/fixtures/security_master.json` (`EQUITYDESK_SECURITY_MASTER_PATH`);
+- no secret is copied into the image (`.dockerignore` excludes `.env*`, keys, `.git`, local databases); secrets come from `.env` via `env_file` at runtime;
+- the image defaults to `EQUITYDESK_ENV=production`, which fails fast unless `LLM_PROVIDER`/`LLM_MODEL`/`LLM_API_KEY` and `SEC_USER_AGENT` are set. For a local smoke test without credentials put `EQUITYDESK_ENV=development` in `.env`.
+
+Health smoke:
 
 ```bash
+cp .env.example .env                  # fill in values; EQUITYDESK_ENV=development for a local smoke
+docker compose config --quiet         # validates the compose file
+docker compose build
 docker compose up -d
-curl -fsS http://localhost:8000/healthz
+docker compose ps                     # api and dashboard should become "healthy"
+curl -fsS http://127.0.0.1:8000/healthz
+curl -fsS http://127.0.0.1:8000/ready
+curl -fsS http://127.0.0.1:8000/health/detailed
+docker compose down                   # data stays in the equitydesk-data volume
 ```
+
+The same build and an API health smoke run in CI (`.github/workflows/ci.yml`, job `image`).
 
 ## 5. CI Quality Gates
 

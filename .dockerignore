@@ -1,0 +1,25 @@
+# Keep the build context small and free of secrets / local state.
+.git
+.github
+.venv
+venv
+.env
+.env.*
+!.env.example
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.claude
+tests
+docs
+data/raw
+data/cache
+data/backups
+data/*.db*
+*.db
+*.sqlite*
+*.pem
+*.key
+secrets

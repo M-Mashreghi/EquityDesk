@@ -45,7 +45,11 @@ def build_container(
 ) -> Container:
     settings = settings or load_settings(env_file=Path(".env"))
     repos = open_database(db_path if db_path is not None else settings.db_path)
-    master = JsonSecurityMaster()
+    master = (
+        JsonSecurityMaster(settings.security_master_path)
+        if settings.security_master_path
+        else JsonSecurityMaster()
+    )
     service = ResearchService(
         companies=repos.companies,
         runs=repos.runs,

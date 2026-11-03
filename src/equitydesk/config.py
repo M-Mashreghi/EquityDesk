@@ -55,6 +55,7 @@ ENV_KEYS: dict[str, str] = {
     "ALERT_WEBHOOK_TOKEN": "alert_webhook_token",
     "EQUITYDESK_API_URL": "api_url",
     "EQUITYDESK_SCHEDULER_TICK_SECONDS": "scheduler_tick_seconds",
+    "EQUITYDESK_SECURITY_MASTER_PATH": "security_master_path",
     "LLM_COST_INPUT_PER_MTOK": "llm_cost_input_per_mtok",
     "LLM_COST_OUTPUT_PER_MTOK": "llm_cost_output_per_mtok",
 }
@@ -67,6 +68,8 @@ class Settings(BaseModel):
     db_path: Path = Path("data/equitydesk.db")
     data_dir: Path = Path("data")
     cache_dir: Path = Path("data/cache")
+    # Curated security master; defaults to the repository's data/fixtures/security_master.json.
+    security_master_path: Path | None = None
     log_level: str = Field(default="INFO", pattern=r"^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")
     log_format: str = Field(default="json", pattern=r"^(json|text)$")
 

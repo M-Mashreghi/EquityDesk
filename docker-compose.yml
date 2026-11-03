@@ -1,0 +1,73 @@
+# EquityDesk local/production compose: API, dashboard and watchlist scheduler from one image.
+# Secrets come from .env (never committed; copy .env.example). Data persists in the named volume.
+name: equitydesk
+
+x-app: &app
+  build:
+    context: .
+    args:
+      PYTHON_VERSION: "3.14"
+  image: equitydesk:local
+  env_file:
+    - path: .env
+      required: false
+  environment:
+    EQUITYDESK_DATA_DIR: /data
+    EQUITYDESK_DB_PATH: /data/equitydesk.db
+    EQUITYDESK_CACHE_DIR: /data/cache
+  volumes:
+    - equitydesk-data:/data
+  restart: unless-stopped
+  read_only: true
+  tmpfs:
+    - /tmp
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  api:
+    <<: *app
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-m", "equitydesk.healthcheck", "http://127.0.0.1:8000/ready"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+  dashboard:
+    <<: *app
+    command:
+      - sh
+      - -c
+      - >-
+        exec streamlit run
+        "$(python -c 'import importlib.util as u; print(u.find_spec("equitydesk.dashboard.app").origin)')"
+        --server.headless true --server.address 0.0.0.0 --server.port 8501
+    environment:
+      EQUITYDESK_API_URL: http://api:8000
+      HOME: /tmp
+    ports:
+      - "127.0.0.1:8501:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-m", "equitydesk.healthcheck", "http://127.0.0.1:8501/_stcore/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  scheduler:
+    <<: *app
+    command: ["python", "-m", "equitydesk.infrastructure.jobs.scheduler"]
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+
+volumes:
+  equitydesk-data:
