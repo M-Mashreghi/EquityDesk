@@ -108,16 +108,16 @@ Update after every verified task.
 - [x] **Task 6.2** — Streamlit Research Dashboard
 - [x] **Task 6.3** — Research History, Snapshot Diff & Refresh Workflow
 - [x] **Task 6.4** — Watchlist, Scheduled Refresh & Alert Hooks
-- [ ] **Task 6.5** — End-to-End Autonomous Research Run
+- [x] **Task 6.5** — End-to-End Autonomous Research Run
 
 ### Verification — Phase 6
 
 | Item | Detail |
 |---|---|
-| Status | Not Started |
-| Tests | — |
-| Docs | — |
-| Notes | — |
+| Status | Completed |
+| Tests | `pytest`: 361 passed (incl. FastAPI integration, Streamlit AppTest, refresh/diff, watchlist, E2E research runs); ruff, mypy --strict clean |
+| Docs | ARCHITECTURE.md contracts 6.1–6.5; DEPLOYMENT env keys; README run commands |
+| Notes | SQLite schema v6; valuation ids scoped per run; E2E runs fully offline (SEC MockTransport, scripted LLM, static prices) |
 
 ## Phase 7 — Hardening, CI/CD & Operations
 
@@ -197,3 +197,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 6.3** (2026-11-03): Refresh creates a new immutable run (refreshed_from link, later as_of only); point-in-time RunState per run and order-independent diff of sources, KPIs, guidance, risks, catalysts, thesis, valuation points and assumption sets; API refresh/diff endpoints and dashboard History tab; valuation ids now scoped to their run (collision found by the refresh test). Separate fix commit registers EQUITYDESK_API_URL (the 6.2 commit had broken test_env_example). 347 tests passed; ruff + mypy clean.
 
 - **Task 6.4** (2026-11-03): Watchlist entries, scheduler tick with atomic per-company refresh-slot claims (duplicate refreshes refused), in-progress guard, new-filing and run-finished alerts referencing runs/reports/source documents, idempotent persisted alerts, webhook sink with secrets from settings (never in payloads/errors), scheduler process + API endpoints; schema v6. 355 tests passed; ruff + mypy clean.
+
+- **Task 6.5** (2026-11-03): ResearchWorkflow (Collecting->Parsing->Analyzing->Valuing->Reviewing) over FilingSource/ReportedFactsSource/MarketDataSource/LLM ports with SEC and static-price adapters, DCF base from reported facts, rule-based thesis skeleton, execute API endpoint and bootstrap wiring; E2E tests: happy path with point-in-time and citation invariants, missing assumptions, source outage, LLM failure, future document, reproducibility. 361 tests passed; ruff + mypy clean.

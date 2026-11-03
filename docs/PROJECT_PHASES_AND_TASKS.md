@@ -614,7 +614,7 @@ Run deterministic and LLM-assisted review for unsupported claims, contradictions
 
 ## Phase 6: API, Dashboard & Research Workflow Automation
 
-**Status:** `[-]` In Progress
+**Status:** `[x]` Completed
 
 ### Task 6.1: Core FastAPI Research API
 
@@ -710,7 +710,7 @@ Add watchlist and configurable refresh scheduling/notifications for new filings 
 
 ### Task 6.5: End-to-End Autonomous Research Run
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Prove ticker → sources → financials → LLM findings → valuation → reviewer → report using deterministic fixtures/fakes for external services.
@@ -724,10 +724,10 @@ Prove ticker → sources → financials → LLM findings → valuation → revie
 
 **Definition of Done (DoD)**
 
-- [ ] Happy path and key failures pass; point-in-time and citation invariants asserted.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Happy path and key failures pass; point-in-time and citation invariants asserted.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -859,9 +859,9 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
 | 4 — LLM Research Intelligence | 5 | 5 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 5 |
-| 6 — API, Dashboard & Research Workflow Automation | 5 | 4 |
+| 6 — API, Dashboard & Research Workflow Automation | 5 | 5 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **29** |
+| **Total** | **35** | **30** |
 
 ## Change Log
 
@@ -897,3 +897,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-11-03 | Task 6.2 completed and verified |
 | 2026-11-03 | Task 6.3 completed and verified |
 | 2026-11-03 | Task 6.4 completed and verified |
+| 2026-11-03 | Task 6.5 completed and verified |

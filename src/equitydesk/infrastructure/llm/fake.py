@@ -6,7 +6,7 @@ import json
 from collections.abc import Callable, Iterable
 from typing import Any
 
-from equitydesk.application.llm import LLMRequest, LLMResponse
+from equitydesk.application.llm import LLMPermanentError, LLMRequest, LLMResponse
 
 Script = str | dict[str, Any] | Exception | LLMResponse | Callable[[LLMRequest], Any]
 
@@ -43,3 +43,14 @@ class ScriptedLLMProvider:
             output_tokens=len(text) // 4,
             stop_reason="end_turn",
         )
+
+
+class UnavailableLLMProvider:
+    """Used when no real provider is configured: every call fails as a permanent provider error,
+    so extraction degrades to explicit unknown findings instead of invented content."""
+
+    name = "unavailable"
+    model = "none"
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        raise LLMPermanentError("no LLM provider configured (LLM_PROVIDER=fake)")

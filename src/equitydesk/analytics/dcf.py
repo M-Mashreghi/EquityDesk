@@ -22,6 +22,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Any
 
+from equitydesk.analytics.accounting import StatementPeriod
 from equitydesk.analytics.kpis import Undefined
 from equitydesk.analytics.valuation import (
     VALUATION_VERSION,
@@ -217,3 +218,44 @@ def dcf_with_sensitivity(
 
     grid = sensitivity_table(cell, "discount_rate", discount_rates, col_name, terminal_values)
     return DcfResult(**{**vars(result), "sensitivity": grid})
+
+
+DEBT_CONCEPTS = ("LongTermDebt", "CurrentDebt", "CommercialPaper")
+CASH_CONCEPTS = ("CashAndEquivalents", "ShortTermInvestments")
+
+
+def dcf_base_from_statements(company_id: str, statements: dict[date, StatementPeriod]) -> DcfBase:
+    """Reported starting point from the latest fiscal year; every input keeps its fact id.
+
+    Revenue, at least one cash line and a diluted share count are required (`Undefined`
+    otherwise). Debt components a filer does not report count as zero, as in the KPI engine.
+    """
+    if not statements:
+        raise Undefined("no fiscal-year statements available")
+    period = statements[max(statements)]
+    missing = [c for c in ("Revenue",) if c not in period.facts]
+    shares = period.facts.get("WeightedSharesDiluted") or period.facts.get("SharesOutstanding")
+    if shares is None:
+        missing.append("WeightedSharesDiluted")
+    if not any(c in period.facts for c in CASH_CONCEPTS):
+        missing.append("CashAndEquivalents")
+    if missing:
+        raise Undefined(f"missing reported inputs for the DCF base: {', '.join(missing)}")
+    assert shares is not None
+    debt = [period.facts[c] for c in DEBT_CONCEPTS if c in period.facts]
+    cash = [period.facts[c] for c in CASH_CONCEPTS if c in period.facts]
+    revenue = period.facts["Revenue"]
+    return DcfBase(
+        company_id=company_id,
+        base_period_end=period.period_end,
+        base_revenue=revenue.value,
+        total_debt=sum(f.value for f in debt),
+        cash_and_investments=sum(f.value for f in cash),
+        diluted_shares=shares.value,
+        sources={
+            "base_revenue": revenue.fact_id,
+            "total_debt": ",".join(f.fact_id for f in debt) or "not reported (0)",
+            "cash_and_investments": ",".join(f.fact_id for f in cash),
+            "diluted_shares": shares.fact_id,
+        },
+    )

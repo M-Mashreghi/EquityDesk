@@ -564,3 +564,19 @@ Accepted findings carry the surviving evidence and the issue codes in `attribute
 - Alerts are persisted first (insert-only, content-derived ids make every hook idempotent), then delivered through an `AlertSink`. `infrastructure/jobs/alerts.WebhookAlertSink` POSTs the alert JSON with an optional `Authorization: Bearer` token; URL and token come from `ALERT_WEBHOOK_URL` / `ALERT_WEBHOOK_TOKEN` (`SecretStr`), are never part of the alert and never appear in delivery errors, which are stored on the alert (`delivered`, `delivery_error`).
 - `infrastructure/jobs/scheduler` runs `tick()` every `EQUITYDESK_SCHEDULER_TICK_SECONDS` (`python -m equitydesk.infrastructure.jobs.scheduler [--once]`); a failing tick is logged and retried on the next tick.
 - SQLite schema v6: `watchlist`, `refresh_claims`, `alerts`. API: `GET /watchlist`, `PUT /watchlist/{company_id}`, `DELETE /watchlist/{company_id}`, `POST /watchlist/tick`, `GET /alerts?company_id=&limit=`.
+
+### End-to-end autonomous research run (Task 6.5)
+
+`application/workflow.ResearchWorkflow.execute(run_id, ResearchInputs)` drives a `Created` run through the whole pipeline; each stage persists its outputs and the run status before the next stage starts:
+
+| Stage | Work | Stops in |
+|---|---|---|
+| Collecting | `FilingSource.collect(company, as_of)` (SEC: `SecFilingSource`, 10-K/10-Q filings accepted by `as_of`), ingestion into the raw store with hash checks; per-document fetch failures are recorded as notes | `BlockedBySource` when nothing could be collected; `Failed` (`FutureLeakageError`) if a source returns a document published after `as_of` |
+| Parsing | point-in-time snapshot (`snapshot_id` stored on the run), parse + persist normalized documents (unparseable documents noted) | `Failed` if no document parses |
+| Analyzing | `ReportedFactsSource` (SEC XBRL facts with acceptance-time availability) → `map_reported_facts(as_of)` → facts persisted → statements → KPIs; business-model and risk/catalyst extractors over snapshot chunks → evidence quality gate → accepted findings persisted; model and prompt versions recorded on the run | — |
+| Valuing | `dcf_base_from_statements` (latest FY revenue, debt, cash, diluted shares with fact ids) + explicit `ResearchInputs` (bull/base/bear `ScenarioCase`s, optional DCF assumptions, explicit peers with sourced fundamentals, sensitivity offsets) → scenario, DCF (+ sensitivity) and multiples records; price = latest `MarketDataSource` observation at or before `as_of` | `NeedsInput` without scenario assumptions or reported base inputs |
+| Reviewing | compose report (analyst thesis points, or the deterministic `rule:thesis_from_findings` skeleton: supported catalysts for, supported risks against, base scenario vs. observed price), independent review (+ LLM contradiction pass), `apply_review` | `Completed` or `NeedsInput` (blocking review findings) |
+
+Unexpected exceptions move the run to `Failed` with the error as the reason. The watchlist `run_finished` hook fires for `Completed` / `NeedsInput` runs. Composition: `bootstrap.build_workflow(container, market_data, sec, provider)` wires SEC EDGAR (`SEC_USER_AGENT` required), the filesystem raw store under `<data_dir>/raw`, `ParserRegistry`, the configured LLM (`UnavailableLLMProvider` when `LLM_PROVIDER=fake`, which degrades extraction to explicit unknowns) and prices from `<data_dir>/market/observations.json` (`StaticMarketData`). API: `POST /research-runs/{id}/execute` with a `ResearchInputs` body runs synchronously and returns the final run, report id, review verdict and notes; a run executes only once.
+
+`tests/e2e/test_research_run.py` proves the path ticker → SEC filings → XBRL financials → LLM findings → valuation → reviewer → report with SEC HTTP, prices and the LLM faked, and covers missing assumptions, a source outage, LLM failure (no invented content, completion blocked), a future document from a source, and reproducibility of identical inputs.

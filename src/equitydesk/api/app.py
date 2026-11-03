@@ -14,6 +14,7 @@ from equitydesk import __version__
 from equitydesk.application.research_service import ResearchService, ServiceError
 from equitydesk.application.resolver import ResolutionResult
 from equitydesk.application.watchlist import WatchlistService
+from equitydesk.application.workflow import ResearchInputs, ResearchWorkflow
 from equitydesk.domain.common import DomainError
 from equitydesk.domain.companies import Company
 from equitydesk.domain.documents import SourceDocument
@@ -110,10 +111,25 @@ Svc = Annotated[ResearchService, Depends(_service)]
 Watch = Annotated[WatchlistService, Depends(_watchlist)]
 
 
-def create_app(service: ResearchService, watchlist: WatchlistService | None = None) -> FastAPI:
+def _workflow(request: Request) -> ResearchWorkflow:
+    workflow: ResearchWorkflow | None = request.app.state.workflow
+    if workflow is None:
+        raise ServiceError("research workflow is not configured")
+    return workflow
+
+
+Flow = Annotated[ResearchWorkflow, Depends(_workflow)]
+
+
+def create_app(
+    service: ResearchService,
+    watchlist: WatchlistService | None = None,
+    workflow: ResearchWorkflow | None = None,
+) -> FastAPI:
     app = FastAPI(title="EquityDesk Research API", version=__version__)
     app.state.service = service
     app.state.watchlist = watchlist
+    app.state.workflow = workflow
 
     @app.exception_handler(ServiceError)
     async def _service_error(_: Request, exc: ServiceError) -> JSONResponse:
@@ -166,6 +182,19 @@ def create_app(service: ResearchService, watchlist: WatchlistService | None = No
     @app.post("/research-runs/{run_id}/refresh", response_model=ResearchRun, status_code=201)
     def refresh_run(s: Svc, run_id: str, body: RefreshRunRequest) -> ResearchRun:
         return s.refresh_run(run_id, body.as_of)
+
+    @app.post("/research-runs/{run_id}/execute")
+    def execute(s: Svc, flow: Flow, run_id: str, body: ResearchInputs) -> dict[str, Any]:
+        run = s.get_run(run_id)
+        if run.status.value != "Created":
+            raise ServiceError(f"run is {run.status.value}; only Created runs can be executed")
+        outcome = flow.execute(run_id, body)
+        return {
+            "run": outcome.run.model_dump(mode="json"),
+            "report_id": outcome.report_id,
+            "review_passed": outcome.review_passed,
+            "notes": outcome.notes,
+        }
 
     @app.get("/research-runs/{run_id}/diff")
     def diff(s: Svc, run_id: str, against: Annotated[str, Query(min_length=1)]) -> dict[str, Any]:
@@ -232,7 +261,11 @@ def create_app(service: ResearchService, watchlist: WatchlistService | None = No
 
 
 def default_app() -> FastAPI:  # pragma: no cover - process entry point
-    from equitydesk.bootstrap import build_container
+    from equitydesk.bootstrap import build_container, build_workflow
 
     container = build_container()
-    return create_app(container.research, container.watchlist)
+    try:
+        workflow: ResearchWorkflow | None = build_workflow(container)
+    except ValueError:  # e.g. SEC_USER_AGENT missing: read-only API still starts
+        workflow = None
+    return create_app(container.research, container.watchlist, workflow)
