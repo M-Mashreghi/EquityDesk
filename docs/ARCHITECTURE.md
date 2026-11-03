@@ -512,3 +512,24 @@ Accepted findings carry the surviving evidence and the issue codes in `attribute
 
 - `apply_review(run, review)` moves a `Reviewing` run to `Completed` when there are no blocking findings, otherwise to `NeedsInput` with the blocking codes as the reason.
 - Persistence (SQLite schema v5, insert-only): `research_reports`, `reviews` and `review_findings` (`SqliteReportRepository`). `SqliteResearchRunRepository.update_run` independently refuses to store a `Completed` run unless the run's latest review passed (`ReviewGateError`), so blocking findings cannot be bypassed.
+
+### Core FastAPI research API (Task 6.1)
+
+- `application/research_service.ResearchService` is the only thing the API calls. It resolves companies (`SecurityResolver`), creates runs (status `Created`, `as_of` must be timezone-aware and not in the future, company/security persisted from the security master), and returns point-in-time results: snapshot documents (or documents published at or before `as_of` when no snapshot exists yet), financial facts available at `as_of` plus KPIs computed by the deterministic engine, persisted valuation runs, and the latest report with its review and Markdown rendering. Failures raise `ServiceError` subclasses (`InvalidRequest`, `NotFound`, `Ambiguous`) carrying structured details (e.g. resolution candidates).
+- `bootstrap.build_container(settings, db_path)` is the composition root (SQLite repositories, JSON security master, service).
+- `api/app.create_app(service)` (FastAPI, optional extra `.[api]`; `default_app()` for `uvicorn --factory`):
+
+| Method | Path | Result |
+|---|---|---|
+| GET | `/healthz` | liveness + version |
+| GET | `/companies/resolve?q=&exchange=` | resolution status, company, candidates, suggestions |
+| GET | `/companies/{company_id}` | company |
+| GET | `/companies/{company_id}/runs` | runs of the company |
+| POST | `/research-runs` | create run `{query, exchange?, as_of?}` → 201 |
+| GET | `/research-runs/{id}` | run with status history |
+| GET | `/research-runs/{id}/documents` | point-in-time documents |
+| GET | `/research-runs/{id}/financials` | facts + KPI metric results at `as_of` |
+| GET | `/research-runs/{id}/valuations` | valuation records |
+| GET | `/research-runs/{id}/report?format=json\|markdown` | report + review (or Markdown) |
+
+- Every error has the shape `{"error": {"code", "message", "details"}}`: `validation_error` (422, with `loc`/`msg`/`type` per field), `invalid_request` (422), `domain_rule_violation` (422), `not_found` (404), `ambiguous` (409, with candidates). Request bodies reject unknown fields. The API contains no research, valuation or persistence logic (enforced by the layer guardrail test).

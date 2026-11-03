@@ -614,11 +614,11 @@ Run deterministic and LLM-assisted review for unsupported claims, contradictions
 
 ## Phase 6: API, Dashboard & Research Workflow Automation
 
-**Status:** `[ ]` Not Started
+**Status:** `[-]` In Progress
 
 ### Task 6.1: Core FastAPI Research API
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Expose company lookup, research-run create/status, documents, financials, valuation and report endpoints through application services.
@@ -632,10 +632,10 @@ Expose company lookup, research-run create/status, documents, financials, valuat
 
 **Definition of Done (DoD)**
 
-- [ ] API integration tests pass; validation errors use structured responses; UI logic absent.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] API integration tests pass; validation errors use structured responses; UI logic absent.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -859,9 +859,9 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
 | 4 — LLM Research Intelligence | 5 | 5 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 5 |
-| 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
+| 6 — API, Dashboard & Research Workflow Automation | 5 | 1 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **25** |
+| **Total** | **35** | **26** |
 
 ## Change Log
 
@@ -893,3 +893,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-11-03 | Task 5.3 completed and verified |
 | 2026-11-03 | Task 5.4 completed and verified |
 | 2026-11-03 | Task 5.5 completed and verified |
+| 2026-11-03 | Task 6.1 completed and verified |

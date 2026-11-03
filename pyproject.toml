@@ -19,8 +19,13 @@ dependencies = [
 llm = [
     "anthropic>=1.13,<2",
 ]
+api = [
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.30,<1",
+]
 dev = [
     "pytest>=8",
+    "fastapi>=0.115,<1",
     "ruff>=0.6",
     "mypy>=1.11",
 ]
@@ -65,6 +70,7 @@ known-first-party = ["equitydesk", "factories"]
 "src/equitydesk/application/llm.py" = ["E501"]
 "src/equitydesk/application/research/*.py" = ["E501"]
 "src/equitydesk/reporting/*.py" = ["E501"]
+"src/equitydesk/api/*.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"

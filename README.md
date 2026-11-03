@@ -134,6 +134,13 @@ ruff format --check src tests        # formatting
 mypy                                 # strict type checks
 ```
 
+Run the API locally (`pip install -e ".[api]"`):
+
+```bash
+uvicorn equitydesk.api.app:default_app --factory --port 8000
+curl -fsS http://localhost:8000/healthz
+```
+
 Layer import rules (`domain` cannot import UI/HTTP/persistence/LLM code, the dashboard cannot import analytics or storage, etc.) are enforced by `tests/unit/test_architecture.py`.
 
 ## Documentation

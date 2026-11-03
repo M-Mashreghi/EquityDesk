@@ -104,7 +104,7 @@ Update after every verified task.
 
 ## Phase 6 — API, Dashboard & Research Workflow Automation
 
-- [ ] **Task 6.1** — Core FastAPI Research API
+- [x] **Task 6.1** — Core FastAPI Research API
 - [ ] **Task 6.2** — Streamlit Research Dashboard
 - [ ] **Task 6.3** — Research History, Snapshot Diff & Refresh Workflow
 - [ ] **Task 6.4** — Watchlist, Scheduled Refresh & Alert Hooks
@@ -189,3 +189,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 5.4** (2026-11-03): Stable report.v1 schema (fixed sections, labeled claims, provenance invariants), deterministic composer from gated findings/metrics/valuation runs/thesis points with full-provenance citations, metric/valuation id links, unsupported thesis points demoted to open questions; Markdown renderer. 320 tests passed; ruff + mypy clean.
 
 - **Task 5.5** (2026-11-03): Deterministic reviewer (critical sections, unsupported/consensus claims, future/unknown/out-of-snapshot/provenance-mismatch/superseded/stale sources, metric/valuation traceability, value and text-calculation mismatch, invented numbers, scenario consistency, contradictions) plus warning-only LLM contradiction pass; apply_review -> Completed/NeedsInput; reports, reviews and review findings persisted (schema v5) with a store-level completion gate. 335 tests passed; ruff + mypy clean.
+
+- **Task 6.1** (2026-11-03): ResearchService (resolve, create run with as_of guard, point-in-time documents/financials/KPIs, valuations, report+review+markdown), bootstrap composition root, FastAPI app with structured error envelope (validation/invalid/not_found/ambiguous); API integration tests on real SQLite. 339 tests passed; ruff + mypy clean.
