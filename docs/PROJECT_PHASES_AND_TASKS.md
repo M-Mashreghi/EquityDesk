@@ -495,11 +495,11 @@ Validate source spans, snapshot membership, citation locators, confidence rules 
 
 ## Phase 5: Valuation, Scenarios, Thesis & Report Review
 
-**Status:** `[ ]` Not Started
+**Status:** `[-]` In Progress
 
 ### Task 5.1: Peer Comparison & Multiples Valuation
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Produce transparent peer tables and selected multiples-based valuation ranges using explicit observations and formulas.
@@ -513,10 +513,10 @@ Produce transparent peer tables and selected multiples-based valuation ranges us
 
 **Definition of Done (DoD)**
 
-- [ ] Peer/date/input table exposed; numerical fixtures pass; missing data does not get imputed by LLM.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Peer/date/input table exposed; numerical fixtures pass; missing data does not get imputed by LLM.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -858,10 +858,10 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 5 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
 | 4 — LLM Research Intelligence | 5 | 5 |
-| 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 0 |
+| 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 1 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **20** |
+| **Total** | **35** | **21** |
 
 ## Change Log
 
@@ -888,3 +888,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 4.3 completed and verified |
 | 2026-10-13 | Task 4.4 completed and verified |
 | 2026-10-13 | Task 4.5 completed and verified |
+| 2026-11-03 | Task 5.1 completed and verified |

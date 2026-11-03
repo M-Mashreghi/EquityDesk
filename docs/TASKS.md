@@ -87,7 +87,7 @@ Update after every verified task.
 
 ## Phase 5 — Valuation, Scenarios, Thesis & Report Review
 
-- [ ] **Task 5.1** — Peer Comparison & Multiples Valuation
+- [x] **Task 5.1** — Peer Comparison & Multiples Valuation
 - [ ] **Task 5.2** — DCF / Intrinsic Scenario Engine
 - [ ] **Task 5.3** — Bull / Base / Bear Scenario Builder
 - [ ] **Task 5.4** — Investment Thesis & Cited Research Report Composer
@@ -179,3 +179,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 4.4** (2026-10-13): Risk/catalyst/open-question extractor with classification + horizon, grounding-required evidence, Jaccard duplicate merging; ungrounded claims rejected. 277 tests passed; ruff + mypy clean.
 
 - **Task 4.5** (2026-10-13): Evidence quality gate: snapshot membership, future-evidence, locator and verbatim-quote checks; blocking rejections vs. warning downgrades (partial evidence, low confidence, secondary-only facts). 288 tests passed; ruff + mypy clean.
+
+- **Task 5.1** (2026-11-03): Peer table with point-in-time prices, market cap/EV/EV-sales/EV-EBITDA/PE/FCF-yield, peer-only stats and p25/median/p75 implied per-share ranges; every missing input recorded as a note, never imputed; traceable ValuationRun. 294 tests passed; ruff + mypy clean.

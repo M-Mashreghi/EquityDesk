@@ -434,3 +434,13 @@ A triggered diagnostic is a prompt for investigation, not a conclusion.
 | fact supported only by secondary sources | warning — `uncertain` (source hierarchy) |
 
 Accepted findings carry the surviving evidence and the issue codes in `attributes.quality_issues`; the `QualityReport` lists accepted, rejected and all issues (with severity).
+
+### Peer comparison and multiples valuation (Task 5.1)
+
+`analytics/multiples.py` builds a point-in-time peer table and multiples-based ranges from explicit inputs only:
+
+- `CompanyFundamentals` carries trailing revenue, EBITDA, net income, FCF, total debt, cash & investments, diluted shares, the fiscal period end and `sources` (metric / fact ids per input).
+- `build_row()` picks the latest `MarketObservation` at or before `as_of` (`FutureLeakageError` if only later prices exist) and computes market cap, EV and `ev_sales`, `ev_ebitda`, `pe` (`market_cap / net_income`) and `fcf_yield`. A missing share count, debt or cash leaves market cap / EV as `None`; a non-positive denominator makes the multiple `None` with a note.
+- `multiples_valuation(target, peers, observations, as_of, peer_set_id)` computes peer-only `summary_stats` and, for each applied multiple, implied per-share values at the peer p25 / median / p75 (`(multiple × target metric − debt + cash) / diluted shares` for EV multiples, `P/E × net income / diluted shares` for P/E). A range is produced only with at least two peer values, a positive target metric and sourced target shares / net-debt inputs; every blocking reason is recorded in `notes` — nothing is imputed, by a model or otherwise.
+- Observations older than 7 days before `as_of`, or more than 7 days apart from the target's, are noted.
+- `to_valuation_run()` persists the full peer/date/input table, the percentiles and outputs as a `ValuationRun` (`method=multiples`) with a content-derived id.

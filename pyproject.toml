@@ -60,6 +60,7 @@ known-first-party = ["equitydesk", "factories"]
 "src/equitydesk/analytics/diagnostics.py" = ["E501"]
 "src/equitydesk/analytics/peers.py" = ["E501"]
 "src/equitydesk/analytics/valuation.py" = ["E501"]
+"src/equitydesk/analytics/multiples.py" = ["E501"]
 "src/equitydesk/application/llm.py" = ["E501"]
 "src/equitydesk/application/research/*.py" = ["E501"]
 
