@@ -43,7 +43,7 @@ services:
       - -c
       - >-
         exec streamlit run
-        "$(python -c 'import importlib.util as u; print(u.find_spec("equitydesk.dashboard.app").origin)')"
+        "$$(python -c 'import importlib.util as u; print(u.find_spec("equitydesk.dashboard.app").origin)')"
         --server.headless true --server.address 0.0.0.0 --server.port 8501
     environment:
       EQUITYDESK_API_URL: http://api:8000

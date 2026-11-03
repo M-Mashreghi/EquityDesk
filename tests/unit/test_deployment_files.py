@@ -44,6 +44,8 @@ def test_compose_persists_data_and_exposes_only_localhost() -> None:
         assert f"\n  {service}" in COMPOSE
     assert COMPOSE.count("equitydesk.healthcheck") == 2 and "no-new-privileges:true" in COMPOSE
     assert "path: .env" in COMPOSE and "required: false" in COMPOSE
+    # compose interpolates `$`: shell substitutions must be escaped as `$$(`
+    assert "$(" not in COMPOSE.replace("$$(", "")
 
 
 class _Handler(BaseHTTPRequestHandler):
