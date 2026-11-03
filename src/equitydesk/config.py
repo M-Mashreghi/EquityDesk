@@ -53,6 +53,7 @@ ENV_KEYS: dict[str, str] = {
     "LLM_MAX_RETRIES": "llm_max_retries",
     "ALERT_WEBHOOK_URL": "alert_webhook_url",
     "ALERT_WEBHOOK_TOKEN": "alert_webhook_token",
+    "EQUITYDESK_API_URL": "api_url",
 }
 
 
@@ -78,6 +79,9 @@ class Settings(BaseModel):
 
     alert_webhook_url: SecretStr | None = None
     alert_webhook_token: SecretStr | None = None
+
+    # Base URL the dashboard uses to reach the research API.
+    api_url: str = Field(default="http://localhost:8000", pattern=r"^https?://")
 
     @model_validator(mode="after")
     def _cross_field_rules(self) -> Settings:
