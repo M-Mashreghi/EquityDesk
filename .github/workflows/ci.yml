@@ -1,0 +1,120 @@
+# Quality gates for every pull request and push to main. Also called by release.yml, so a
+# release can only be published after exactly these gates pass.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+
+# Least privilege: CI only reads the repository. No secrets are used (all providers are faked).
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  quality:
+    name: lint, types, tests (Python 3.14, pinned)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: constraints.txt
+      - name: Install
+        run: python -m pip install -c constraints.txt -e ".[dev,api,dashboard,llm]"
+      - name: Ruff lint
+        run: ruff check src tests
+      - name: Ruff format
+        run: ruff format --check src tests
+      - name: Mypy (strict)
+        run: mypy
+      - name: Point-in-time leakage audit and reproducibility
+        run: pytest -q tests/e2e/test_point_in_time_audit.py
+      - name: Full test suite
+        run: pytest -q
+
+  compatibility:
+    name: tests (Python 3.12, unpinned minimum supported)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install -e ".[dev,api,dashboard]"
+      - name: Tests
+        run: pytest -q
+
+  security:
+    name: dependency audit and secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Audit pinned dependencies (known vulnerabilities fail the build)
+        run: |
+          python -m pip install pip-audit
+          pip-audit -r constraints.txt --disable-pip --no-deps --progress-spinner off
+      - name: No secret literals or committed env files
+        run: |
+          if git ls-files | grep -E '(^|/)\.env($|\.)' | grep -v '\.env\.example$'; then
+            echo "committed .env file"; exit 1
+          fi
+          if git grep -nE '(sk-ant-[A-Za-z0-9_-]{16,}|sk-[A-Za-z0-9]{32,}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{30,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)' -- . ':!tests'; then
+            echo "secret-like literal found"; exit 1
+          fi
+
+  image:
+    name: container build and health smoke
+    needs: [quality, security]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Compose file is valid
+        run: docker compose config --quiet
+      - name: Build image
+        run: docker build -t equitydesk:ci .
+      - name: Health smoke (API /ready inside the container)
+        run: |
+          docker volume create equitydesk-ci-data
+          docker run -d --name equitydesk-ci -p 127.0.0.1:8000:8000 \
+            -e EQUITYDESK_ENV=development --read-only --tmpfs /tmp \
+            -v equitydesk-ci-data:/data equitydesk:ci
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/ready; then break; fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:8000/healthz
+          curl -fsS http://127.0.0.1:8000/health/detailed
+          test "$(docker inspect -f '{{.Config.User}}' equitydesk:ci)" = "equitydesk"
+          for i in $(seq 1 30); do
+            status="$(docker inspect -f '{{.State.Health.Status}}' equitydesk-ci)"
+            [ "$status" = "healthy" ] && break
+            sleep 2
+          done
+          test "$status" = "healthy"
+      - name: Container logs
+        if: always()
+        run: docker logs equitydesk-ci || true

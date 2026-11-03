@@ -77,3 +77,29 @@ def test_security_master_path_is_configurable(tmp_path: Path) -> None:
     )
     c = build_container(Settings(security_master_path=master), db_path=tmp_path / "x.db")
     assert c.research.resolve("AAPL").company is not None
+
+
+CI = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+RELEASE = (ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+
+
+def test_ci_runs_all_quality_gates_read_only() -> None:
+    assert re.search(r"^permissions:\n  contents: read$", CI, re.M)
+    assert "write" not in CI and "secrets." not in CI  # CI needs no secrets
+    for gate in ("ruff check src tests", "ruff format --check src tests", "mypy", "pytest -q",
+                 "test_point_in_time_audit.py", "pip-audit", "docker build", "/ready"):  # fmt: skip
+        assert gate in CI, gate
+    assert "needs: [quality, security]" in CI and "persist-credentials: false" in CI
+
+
+def test_release_publishes_only_after_gates_with_scoped_permissions() -> None:
+    assert re.search(r"^permissions:\n  contents: read$", RELEASE, re.M)  # default: read-only
+    assert "uses: ./.github/workflows/ci.yml" in RELEASE
+    publish = RELEASE[RELEASE.index("  publish:") :]
+    assert "needs: gates" in publish
+    assert "contents: write" in publish and "packages: write" in publish
+    assert RELEASE.index("contents: write") > RELEASE.index("  publish:")  # write only in publish
+    assert "Tag must match the package version" in publish
+    assert "secrets.GITHUB_TOKEN" in publish and not re.search(
+        r"secrets\.(?!GITHUB_TOKEN)", RELEASE
+    )

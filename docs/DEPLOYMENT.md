@@ -95,19 +95,22 @@ docker compose down                   # data stays in the equitydesk-data volume
 
 The same build and an API health smoke run in CI (`.github/workflows/ci.yml`, job `image`).
 
-## 5. CI Quality Gates
+## 5. CI/CD
 
-PR/main CI should run:
+`.github/workflows/ci.yml` (pull requests, pushes to `main`, and reused by the release):
 
-1. dependency install from lock
-2. formatting/lint checks
-3. type checks where configured
-4. full pytest suite
-5. point-in-time leakage tests
-6. security/dependency audit
-7. build/import smoke
+| Job | Checks |
+|---|---|
+| `quality` | Python 3.14 with `constraints.txt`: ruff lint, ruff format, mypy --strict, point-in-time leakage + reproducibility suite, full pytest |
+| `compatibility` | Python 3.12 (minimum supported), unpinned install, full pytest |
+| `security` | `pip-audit` of `constraints.txt` (any known vulnerability fails), no committed `.env`, no secret-like literals outside tests |
+| `image` | after `quality` and `security`: `docker compose config`, `docker build`, container started read-only with a volume, `/ready`, `/healthz`, `/health/detailed`, non-root user and Docker health status `healthy` |
 
-Release/image publish must depend on successful quality gates.
+`.github/workflows/release.yml` runs on tags `vX.Y.Z`: it first calls the whole CI workflow (`gates`); only if every gate passes does `publish` run, which checks that the tag equals the `pyproject.toml` version, builds and pushes `ghcr.io/<owner>/equitydesk:<tag>` and `:latest` with OCI labels, and creates the GitHub release with generated notes.
+
+Least privilege: both workflows default to `contents: read`; only the `publish` job gets `contents: write` and `packages: write`, uses only the built-in `GITHUB_TOKEN`, and runs in the `release` environment (protect it with required reviewers in the repository settings). Checkouts do not persist credentials. CI needs no provider secrets because SEC, prices and the LLM are faked in tests.
+
+Updating dependencies: change the environment, run the full suite, then regenerate `constraints.txt` with `pip freeze --exclude-editable` (keep the header) and re-run `pip-audit -r constraints.txt --disable-pip --no-deps`.
 
 ## 6. Release Checklist
 
