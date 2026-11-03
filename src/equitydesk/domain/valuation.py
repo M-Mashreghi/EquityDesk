@@ -101,3 +101,22 @@ class DcfAssumptions(DomainModel):
     @property
     def horizon_years(self) -> int:
         return len(self.revenue_growth)
+
+
+class ScenarioName(StrEnum):
+    BULL = "bull"
+    BASE = "base"
+    BEAR = "bear"
+
+
+# Assumption fields that must carry a written rationale in every scenario (no hidden inputs).
+DOCUMENTED_FIELDS = ("revenue_growth", "ebit_margin", "discount_rate")
+
+
+class ScenarioCase(DomainModel):
+    """One bull/base/bear case: an explicit DCF assumption set plus its narrative."""
+
+    name: ScenarioName
+    assumptions: DcfAssumptions
+    narrative: str = Field(min_length=1, description="what has to be true for this case")
+    probability: float | None = Field(default=None, ge=0.0, le=1.0)

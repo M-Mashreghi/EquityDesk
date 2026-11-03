@@ -89,7 +89,7 @@ Update after every verified task.
 
 - [x] **Task 5.1** — Peer Comparison & Multiples Valuation
 - [x] **Task 5.2** — DCF / Intrinsic Scenario Engine
-- [ ] **Task 5.3** — Bull / Base / Bear Scenario Builder
+- [x] **Task 5.3** — Bull / Base / Bear Scenario Builder
 - [ ] **Task 5.4** — Investment Thesis & Cited Research Report Composer
 - [ ] **Task 5.5** — Independent Reviewer / Contradiction & Completeness Gate
 
@@ -183,3 +183,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 5.1** (2026-11-03): Peer table with point-in-time prices, market cap/EV/EV-sales/EV-EBITDA/PE/FCF-yield, peer-only stats and p25/median/p75 implied per-share ranges; every missing input recorded as a note, never imputed; traceable ValuationRun. 294 tests passed; ruff + mypy clean.
 
 - **Task 5.2** (2026-11-03): Versioned DcfAssumptions (model-authored sets rejected), FCFF forecast, Gordon/exit-multiple TV, end/mid-year discounting, EV->equity->per-share bridge, WACC x terminal sensitivity grid; hand-worked two-year fixture. 305 tests passed; ruff + mypy clean.
+
+- **Task 5.3** (2026-11-03): ScenarioCase (bull/base/bear) on shared reported base facts; every value labeled fact/assumption/calculation with provenance; blocking checks (complete set, documented assumptions, horizon, probabilities, value ordering) and warnings; probability-weighted value; traceable scenario ValuationRun. 312 tests passed; ruff + mypy clean.

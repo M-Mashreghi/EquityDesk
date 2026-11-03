@@ -545,7 +545,7 @@ Implement deterministic DCF/scenario model with explicit forecast, WACC/discount
 
 ### Task 5.3: Bull / Base / Bear Scenario Builder
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Combine explicit assumptions with deterministic models to produce scenario operating and valuation outputs.
@@ -559,10 +559,10 @@ Combine explicit assumptions with deterministic models to produce scenario opera
 
 **Definition of Done (DoD)**
 
-- [ ] Facts vs assumptions labeled; scenario consistency checks pass; no hidden assumption.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Facts vs assumptions labeled; scenario consistency checks pass; no hidden assumption.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -858,10 +858,10 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 5 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
 | 4 — LLM Research Intelligence | 5 | 5 |
-| 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 2 |
+| 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 3 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **22** |
+| **Total** | **35** | **23** |
 
 ## Change Log
 
@@ -890,3 +890,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 4.5 completed and verified |
 | 2026-11-03 | Task 5.1 completed and verified |
 | 2026-11-03 | Task 5.2 completed and verified |
+| 2026-11-03 | Task 5.3 completed and verified |

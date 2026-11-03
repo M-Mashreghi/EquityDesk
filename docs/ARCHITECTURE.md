@@ -452,3 +452,24 @@ Accepted findings carry the surviving evidence and the issue codes in `attribute
 - `run_dcf(base, assumptions)` forecasts revenue → EBIT → NOPAT → FCFF (`nopat + d&a − capex − Δnwc`), discounts with end- or mid-year factors, adds a Gordon or exit-multiple terminal value discounted at the end of year n, and bridges EV → equity → per share. The result keeps the yearly table, PV split and terminal share of EV.
 - `dcf_with_sensitivity()` attaches a per-share grid over discount rate × terminal growth (or exit multiple); economically undefined cells are `None`.
 - `DcfResult.to_valuation_run()` stores inputs with sources, the full assumption set plus its SHA-256 `assumptions_hash`, the forecast table, sensitivity grid and outputs (`method=dcf`, version `1.0.0/dcf-1.0.0`). A DCF value is a scenario output, not a price target.
+
+### Bull / base / bear scenario builder (Task 5.3)
+
+- `domain/valuation.ScenarioCase` = `name` (`bull` / `base` / `bear`), a full `DcfAssumptions` set, a narrative ("what has to be true") and an optional probability.
+- `analytics/scenarios.build_scenarios(base, cases, price=None)` runs every case through `run_dcf` on the **same** reported base facts and returns a `ScenarioAnalysis`. Each case exposes `LabeledValue`s tagged `fact` (with its source id), `assumption` (with the assumption-set source) or `calculation` (with its formula): base facts, every DCF input, final-year revenue / EBIT, revenue CAGR, cumulative FCFF, EV, equity, value per share and terminal share of EV. `upside` is computed against a point-in-time price observation when supplied.
+- Consistency checks (`ConsistencyIssue`, blocking or warning):
+
+| Code | Severity | Rule |
+|---|---|---|
+| `scenario_set_incomplete` | blocking | exactly one bull, base and bear case |
+| `undocumented_assumption` | blocking | revenue growth, EBIT margin, discount rate and the terminal input need a written rationale (no hidden assumption) |
+| `horizon_mismatch` | blocking | all cases share the forecast horizon |
+| `partial_probabilities` / `probabilities_do_not_sum_to_one` | blocking | probabilities are all-or-none and sum to 1 |
+| `value_ordering` | blocking | per-share value bull ≥ base ≥ bear |
+| `undefined_valuation` | blocking | the DCF is not computable for a case |
+| `driver_ordering` | warning | final-year revenue and EBIT ordered bull ≥ base ≥ bear |
+| `terminal_method_mismatch` | warning | cases use different terminal methods |
+| `aggressive_terminal_growth` | warning | terminal growth > 4% |
+| `terminal_value_dominates` | warning | PV of terminal value > 85% of EV |
+
+- A probability-weighted value is computed only when every case has a probability and the probabilities are valid. `to_valuation_run()` persists facts, price, every case's assumptions (with hash, probability, narrative), labeled outputs and issues (`method=scenario`).
