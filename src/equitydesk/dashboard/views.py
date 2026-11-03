@@ -125,3 +125,28 @@ def review_summary(review: dict[str, Any] | None) -> list[dict[str, Any]]:
         }
         for f in sorted(review["findings"], key=lambda f: order.get(f["severity"], 3))
     ]
+
+
+def history_rows(runs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "as_of": r["as_of"],
+            "status": r["status"],
+            "run": r["research_run_id"],
+            "refreshed_from": r.get("refreshed_from") or "",
+        }
+        for r in sorted(runs, key=lambda r: (r["as_of"], r["created_at"]), reverse=True)
+    ]
+
+
+def diff_sections(diff: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+    """Diff payload as display tables: set changes as +/- rows, value changes as old/new/delta."""
+    out: dict[str, list[dict[str, Any]]] = {}
+    for key in ("sources", "guidance", "risks", "catalysts", "thesis"):
+        rows = [{"change": "added", "item": x} for x in diff[key]["added"]]
+        rows += [{"change": "removed", "item": x} for x in diff[key]["removed"]]
+        out[key] = rows
+    out["kpis"] = diff["kpis"]
+    out["valuation"] = diff["valuation"]
+    out["assumptions"] = [{"changed assumption set": x} for x in diff["assumptions_changed"]]
+    return out

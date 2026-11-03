@@ -142,7 +142,7 @@ class MultiplesValuation:
             for r in self.implied
         }  # fmt: skip
         digest = hashlib.sha256(
-            json.dumps([inputs, outputs], sort_keys=True, default=str).encode()
+            json.dumps([research_run_id, inputs, outputs], sort_keys=True, default=str).encode()
         ).hexdigest()
         return ValuationRun(
             valuation_id=f"val_mult_{digest[:20]}",

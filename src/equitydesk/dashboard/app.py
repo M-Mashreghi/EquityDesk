@@ -86,7 +86,7 @@ def run_page(run_id: str) -> None:
     st.caption(f"Company {run['company_id']} · as of {run['as_of']} · created {run['created_at']}")
     st.progress(fraction, text=label)
 
-    tabs = st.tabs(["Sources", "Financials", "Valuation", "Scenarios", "Report"])
+    tabs = st.tabs(["Sources", "Financials", "Valuation", "Scenarios", "Report", "History"])
     with tabs[0]:
         docs = api.documents(run_id)
         st.write(f"{len(docs)} documents published at or before as_of")
@@ -134,6 +134,39 @@ def run_page(run_id: str) -> None:
             if findings:
                 st.dataframe(findings, width="stretch")
             st.markdown(api.report_markdown(run_id))
+    with tabs[5]:
+        history_tab(api, run)
+
+
+def history_tab(api: ApiClient, run: dict[str, Any]) -> None:
+    runs = api.company_runs(run["company_id"])
+    st.dataframe(views.history_rows(runs), width="stretch")
+    refresh_day = st.date_input(
+        "Refresh as of (UTC end of day)", value=datetime.now(UTC).date(), key="refresh_as_of"
+    )
+    if st.button("Refresh run", key="refresh"):
+        as_of = min(datetime.combine(refresh_day, time(23, 59, 59), tzinfo=UTC), datetime.now(UTC))
+        try:
+            new = api.refresh_run(run["research_run_id"], as_of.isoformat())
+            st.session_state["run_id"] = new["research_run_id"]
+            st.rerun()
+        except ApiError as exc:
+            show_error(exc)
+    others = [r["research_run_id"] for r in runs if r["research_run_id"] != run["research_run_id"]]
+    default = run.get("refreshed_from")
+    if others:
+        against = st.selectbox(
+            "Compare with",
+            others,
+            index=others.index(default) if default in others else 0,
+            key="diff_against",
+        )
+        diff = api.diff(run["research_run_id"], against)
+        st.caption(f"{diff['old_as_of']} → {diff['new_as_of']}")
+        for title, rows in views.diff_sections(diff).items():
+            st.markdown(f"**{title.capitalize()}** ({len(rows)} changes)")
+            if rows:
+                st.dataframe(rows, width="stretch")
 
 
 def main() -> None:

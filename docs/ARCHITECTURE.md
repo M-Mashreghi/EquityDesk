@@ -540,3 +540,16 @@ Accepted findings carry the surviving evidence and the issue codes in `attribute
 - `dashboard/views.py` only reshapes API JSON for display (run progress over the lifecycle, document table, KPI series/table, valuation and scenario tables, labeled scenario assumptions, review findings ordered by severity); it derives no numbers.
 - `dashboard/app.py` (run with `EQUITYDESK_API_URL=… streamlit run src/equitydesk/dashboard/app.py`): sidebar company search (resolve, ambiguity candidates), run launcher (`as_of` = end of the chosen UTC day, capped at now), open-run-by-id; main page with progress bar and tabs Sources, Financials (KPI line chart + latest-period table with formulas and missing inputs), Valuation, Scenarios (per-scenario fact / assumption / calculation table) and Report (review verdict, findings, Markdown report).
 - The primary workflow (search → create run → view results/report) and error display are tested headless with Streamlit `AppTest` against the real API and SQLite.
+
+### Research history, snapshot diff and refresh (Task 6.3)
+
+- `ResearchRun.refreshed_from` links a refresh to the run it refreshes (part of the run's immutable identity in SQLite).
+- `ResearchService.refresh_run(run_id, as_of)` creates a **new** run for the same company and security with a strictly later `as_of` (timezone-aware, not in the future); the previous run and everything attached to it are never modified. A run's own history is `GET /companies/{id}/runs` (ordered by `as_of`).
+- Valuation record ids now include the research run id, so identical inputs in two runs produce two distinct, immutable records.
+- `application/history.diff_runs(a, b)` compares two `RunState`s of one company (the earlier `as_of` is always the old side, so the diff is order-independent). Each side is read strictly as of its own run: snapshot documents, facts available at its `as_of` with KPIs recomputed, the run's own findings, valuation records and latest report. The diff contains:
+  - `sources` added / removed documents;
+  - `kpis`: latest computable value per metric with old / new period, value and delta (unchanged metrics omitted);
+  - `guidance` (guidance, strategy, tone findings), `risks` and `catalysts` added / removed (risks/catalysts matched by normalized title);
+  - `thesis` claims added / removed;
+  - `valuation` per-share points (multiples mid, DCF, each scenario, probability-weighted) old / new / delta, and `assumptions_changed` (assumption-set hashes that differ).
+- API: `POST /research-runs/{id}/refresh {as_of?}` → 201 new run; `GET /research-runs/{id}/diff?against={other_id}` (422 if the runs belong to different companies). The dashboard has a History tab (run list, refresh button, diff tables).

@@ -106,7 +106,7 @@ Update after every verified task.
 
 - [x] **Task 6.1** — Core FastAPI Research API
 - [x] **Task 6.2** — Streamlit Research Dashboard
-- [ ] **Task 6.3** — Research History, Snapshot Diff & Refresh Workflow
+- [x] **Task 6.3** — Research History, Snapshot Diff & Refresh Workflow
 - [ ] **Task 6.4** — Watchlist, Scheduled Refresh & Alert Hooks
 - [ ] **Task 6.5** — End-to-End Autonomous Research Run
 
@@ -193,3 +193,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 6.1** (2026-11-03): ResearchService (resolve, create run with as_of guard, point-in-time documents/financials/KPIs, valuations, report+review+markdown), bootstrap composition root, FastAPI app with structured error envelope (validation/invalid/not_found/ambiguous); API integration tests on real SQLite. 339 tests passed; ruff + mypy clean.
 
 - **Task 6.2** (2026-11-03): Thin Streamlit dashboard over the API (ApiClient + display-only views): company search, run launcher, progress, source explorer, KPI charts, valuation/scenario views, review + cited report reader; headless AppTest of the primary workflow and errors; real uvicorn + streamlit smoke run. 344 tests passed; ruff + mypy clean.
+
+- **Task 6.3** (2026-11-03): Refresh creates a new immutable run (refreshed_from link, later as_of only); point-in-time RunState per run and order-independent diff of sources, KPIs, guidance, risks, catalysts, thesis, valuation points and assumption sets; API refresh/diff endpoints and dashboard History tab; valuation ids now scoped to their run (collision found by the refresh test). Separate fix commit registers EQUITYDESK_API_URL (the 6.2 commit had broken test_env_example). 347 tests passed; ruff + mypy clean.

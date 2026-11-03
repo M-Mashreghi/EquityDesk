@@ -323,7 +323,14 @@ class SqliteResearchRunRepository:
         current = self.get_run(run.research_run_id)
         if current.is_terminal:
             raise ImmutableRecordError(f"research run {run.research_run_id} is {current.status}")
-        identity = ("company_id", "security_id", "as_of", "created_at", "config_version")
+        identity = (
+            "company_id",
+            "security_id",
+            "as_of",
+            "created_at",
+            "config_version",
+            "refreshed_from",
+        )
         if any(getattr(current, f) != getattr(run, f) for f in identity):
             raise ImmutableRecordError("research run identity fields cannot change")
         if run.status is ResearchStatus.COMPLETED:

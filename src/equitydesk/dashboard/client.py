@@ -64,6 +64,17 @@ class ApiClient:
         result: dict[str, Any] = self._json("POST", "/research-runs", json=body)
         return result
 
+    def refresh_run(self, run_id: str, as_of: str | None = None) -> dict[str, Any]:
+        body = {"as_of": as_of} if as_of else {}
+        result: dict[str, Any] = self._json("POST", f"/research-runs/{run_id}/refresh", json=body)
+        return result
+
+    def diff(self, run_id: str, against: str) -> dict[str, Any]:
+        result: dict[str, Any] = self._json(
+            "GET", f"/research-runs/{run_id}/diff", params={"against": against}
+        )
+        return result
+
     def run(self, run_id: str) -> dict[str, Any]:
         result: dict[str, Any] = self._json("GET", f"/research-runs/{run_id}")
         return result

@@ -13,10 +13,12 @@ from typing import Any
 
 from equitydesk.analytics.accounting import annual_statements
 from equitydesk.analytics.kpis import compute_kpis
+from equitydesk.application.history import RunDiff, RunState, diff_runs
 from equitydesk.application.ports import (
     CompanyRepository,
     DocumentRepository,
     FinancialFactRepository,
+    FindingRepository,
     NotFoundError,
     ReportRepository,
     ResearchRunRepository,
@@ -84,6 +86,7 @@ class ResearchService:
     reports: ReportRepository
     snapshots: SnapshotReader
     resolver: SecurityResolver
+    findings: FindingRepository
     config_version: str = "1"
     clock: Callable[[], datetime] = field(default=utc_now)
 
@@ -148,6 +151,50 @@ class ResearchService:
     def list_runs(self, company_id: str) -> list[ResearchRun]:
         self.get_company(company_id)
         return self.runs.runs_for_company(company_id)
+
+    def refresh_run(self, research_run_id: str, as_of: datetime | None = None) -> ResearchRun:
+        """Create a new run for a later `as_of`; the previous run is never modified."""
+        previous = self.get_run(research_run_id)
+        now = self.clock()
+        as_of = as_of or now
+        if as_of.tzinfo is None:
+            raise InvalidRequest("as_of must include a timezone")
+        if as_of > now:
+            raise InvalidRequest("as_of cannot be in the future", {"as_of": as_of.isoformat()})
+        if as_of <= previous.as_of:
+            raise InvalidRequest(
+                "a refresh must use a later as_of than the run it refreshes",
+                {"previous_as_of": previous.as_of.isoformat(), "as_of": as_of.isoformat()},
+            )
+        run = ResearchRun(
+            research_run_id=new_id("run"),
+            company_id=previous.company_id,
+            security_id=previous.security_id,
+            as_of=as_of,
+            created_at=now,
+            config_version=self.config_version,
+            refreshed_from=previous.research_run_id,
+        )
+        self.runs.add_run(run)
+        return run
+
+    def run_state(self, research_run_id: str) -> RunState:
+        run = self.get_run(research_run_id)
+        reports = self.reports.reports_for_run(run.research_run_id)
+        return RunState(
+            run=run,
+            documents=self.run_documents(run.research_run_id),
+            metrics=self.run_financials(run.research_run_id).metrics,
+            findings=self.findings.findings_for_run(run.research_run_id),
+            valuations=self.valuations.valuations_for_run(run.research_run_id),
+            report=reports[-1] if reports else None,
+        )
+
+    def diff(self, run_a: str, run_b: str) -> RunDiff:
+        a, b = self.run_state(run_a), self.run_state(run_b)
+        if a.run.company_id != b.run.company_id:
+            raise InvalidRequest("runs belong to different companies")
+        return diff_runs(a, b)
 
     # --- point-in-time results -------------------------------------------------------------
 

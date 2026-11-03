@@ -65,11 +65,16 @@ class ResearchRun(DomainModel):
     model_version: str | None = None
     prompt_versions: dict[str, str] = Field(default_factory=dict)
     snapshot_id: str | None = None
+    refreshed_from: str | None = Field(
+        default=None, description="run this one refreshes (same company, earlier as_of)"
+    )
 
     @model_validator(mode="after")
     def _no_future_as_of(self) -> ResearchRun:
         if self.as_of > self.created_at:
             raise ValueError("as_of cannot be later than the run creation time")
+        if self.refreshed_from == self.research_run_id:
+            raise ValueError("a run cannot refresh itself")
         return self
 
     @property

@@ -35,6 +35,7 @@ def build_container(
         reports=repos.reports,
         snapshots=repos.snapshots,
         resolver=SecurityResolver(master),
+        findings=repos.findings,
         config_version=CONFIG_SCHEMA_VERSION,
     )
     return Container(settings, repos, master, service)

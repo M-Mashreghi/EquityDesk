@@ -32,6 +32,14 @@ class CreateRunRequest(BaseModel):
     as_of: datetime | None = Field(default=None, description="timezone-aware; defaults to now")
 
 
+class RefreshRunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    as_of: datetime | None = Field(
+        default=None, description="later than the refreshed run; defaults to now"
+    )
+
+
 class ResolutionResponse(BaseModel):
     status: str
     query: str
@@ -135,6 +143,14 @@ def create_app(service: ResearchService) -> FastAPI:
     @app.get("/research-runs/{run_id}", response_model=ResearchRun)
     def get_run(s: Svc, run_id: str) -> ResearchRun:
         return s.get_run(run_id)
+
+    @app.post("/research-runs/{run_id}/refresh", response_model=ResearchRun, status_code=201)
+    def refresh_run(s: Svc, run_id: str, body: RefreshRunRequest) -> ResearchRun:
+        return s.refresh_run(run_id, body.as_of)
+
+    @app.get("/research-runs/{run_id}/diff")
+    def diff(s: Svc, run_id: str, against: Annotated[str, Query(min_length=1)]) -> dict[str, Any]:
+        return s.diff(against, run_id).as_dict()
 
     @app.get("/research-runs/{run_id}/documents", response_model=list[SourceDocument])
     def documents(s: Svc, run_id: str) -> list[SourceDocument]:

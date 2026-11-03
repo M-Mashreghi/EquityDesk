@@ -664,7 +664,7 @@ Build company search, run launcher, progress, source explorer, financial charts,
 
 ### Task 6.3: Research History, Snapshot Diff & Refresh Workflow
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Allow new runs for later `as_of` dates and show what changed in sources, KPIs, guidance, risks, thesis inputs and valuation.
@@ -678,10 +678,10 @@ Allow new runs for later `as_of` dates and show what changed in sources, KPIs, g
 
 **Definition of Done (DoD)**
 
-- [ ] Refresh creates new immutable run; previous run unchanged; diff tests pass.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Refresh creates new immutable run; previous run unchanged; diff tests pass.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -859,9 +859,9 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
 | 4 — LLM Research Intelligence | 5 | 5 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 5 |
-| 6 — API, Dashboard & Research Workflow Automation | 5 | 2 |
+| 6 — API, Dashboard & Research Workflow Automation | 5 | 3 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **27** |
+| **Total** | **35** | **28** |
 
 ## Change Log
 
@@ -895,3 +895,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-11-03 | Task 5.5 completed and verified |
 | 2026-11-03 | Task 6.1 completed and verified |
 | 2026-11-03 | Task 6.2 completed and verified |
+| 2026-11-03 | Task 6.3 completed and verified |

@@ -119,7 +119,7 @@ class ScenarioAnalysis:
         outputs["probability_weighted_value"] = self.probability_weighted_value
         outputs["issues"] = [vars(i) for i in self.issues]
         digest = hashlib.sha256(
-            json.dumps([inputs, assumptions], sort_keys=True).encode()
+            json.dumps([research_run_id, inputs, assumptions], sort_keys=True).encode()
         ).hexdigest()
         return ValuationRun(
             valuation_id=f"val_scn_{digest[:20]}",
