@@ -121,7 +121,7 @@ Update after every verified task.
 
 ## Phase 7 — Hardening, CI/CD & Operations
 
-- [ ] **Task 7.1** — Point-in-Time Leakage Audit & Reproducibility Suite
+- [x] **Task 7.1** — Point-in-Time Leakage Audit & Reproducibility Suite
 - [ ] **Task 7.2** — Observability, Cost Telemetry & Health Checks
 - [ ] **Task 7.3** — Dockerization & Production Configuration
 - [ ] **Task 7.4** — GitHub Actions CI/CD & Release Workflow
@@ -199,3 +199,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 6.4** (2026-11-03): Watchlist entries, scheduler tick with atomic per-company refresh-slot claims (duplicate refreshes refused), in-progress guard, new-filing and run-finished alerts referencing runs/reports/source documents, idempotent persisted alerts, webhook sink with secrets from settings (never in payloads/errors), scheduler process + API endpoints; schema v6. 355 tests passed; ruff + mypy clean.
 
 - **Task 6.5** (2026-11-03): ResearchWorkflow (Collecting->Parsing->Analyzing->Valuing->Reviewing) over FilingSource/ReportedFactsSource/MarketDataSource/LLM ports with SEC and static-price adapters, DCF base from reported facts, rule-based thesis skeleton, execute API endpoint and bootstrap wiring; E2E tests: happy path with point-in-time and citation invariants, missing assumptions, source outage, LLM failure, future document, reproducibility. 361 tests passed; ruff + mypy clean.
+
+- **Task 7.1** (2026-11-03): 15-vector leakage matrix across snapshot, SEC index, workflow, mapper, API, market, peers, gate, composer, schema, reviewer, runs and history; frozen offline AAPL run compared against documented golden values (tests/fixtures/reproducibility). Shared E2E setup moved to tests/e2e_support.py. 377 tests passed; ruff + mypy clean.

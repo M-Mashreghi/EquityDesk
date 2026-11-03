@@ -580,3 +580,27 @@ Accepted findings carry the surviving evidence and the issue codes in `attribute
 Unexpected exceptions move the run to `Failed` with the error as the reason. The watchlist `run_finished` hook fires for `Completed` / `NeedsInput` runs. Composition: `bootstrap.build_workflow(container, market_data, sec, provider)` wires SEC EDGAR (`SEC_USER_AGENT` required), the filesystem raw store under `<data_dir>/raw`, `ParserRegistry`, the configured LLM (`UnavailableLLMProvider` when `LLM_PROVIDER=fake`, which degrades extraction to explicit unknowns) and prices from `<data_dir>/market/observations.json` (`StaticMarketData`). API: `POST /research-runs/{id}/execute` with a `ResearchInputs` body runs synchronously and returns the final run, report id, review verdict and notes; a run executes only once.
 
 `tests/e2e/test_research_run.py` proves the path ticker → SEC filings → XBRL financials → LLM findings → valuation → reviewer → report with SEC HTTP, prices and the LLM faked, and covers missing assumptions, a source outage, LLM failure (no invented content, completion blocked), a future document from a source, and reproducibility of identical inputs.
+
+### Point-in-time leakage audit and reproducibility (Task 7.1)
+
+`tests/e2e/test_point_in_time_audit.py` is the leakage matrix: every vector plants information that becomes public after `as_of` and asserts it never reaches the run.
+
+| Vector | Layer | Guarantee |
+|---|---|---|
+| `documents/published-after-as_of` | snapshot builder | future documents excluded and listed |
+| `documents/correction-published-later` | snapshot builder | a later corrected version does not replace the version visible at `as_of` |
+| `documents/sec-index-after-as_of` | SEC adapter | filings accepted after `as_of` (e.g. a later 10-K/A) never enumerated |
+| `documents/source-returns-future-document` | workflow | run fails with `FutureLeakageError`, nothing is stored |
+| `financials/restatement-filed-later` | statement mapper | a restatement filed after `as_of` is not applied |
+| `financials/api-fact-available-later` | API | `/financials` returns only facts available at `as_of` |
+| `market/later-price` | market contract | later prices ignored; only-later prices raise |
+| `peers/later-peer-price` | multiples | peer prices are point-in-time; only-later peer prices raise |
+| `peers/peer-set-version-effective-later` | peer-set store | a version effective after `as_of` is not used |
+| `findings/evidence-from-future-document` | quality gate | the finding is rejected |
+| `report/compose-with-future-document` | composer | composition raises |
+| `report/citation-after-as_of` | report schema | a citation published after `as_of` is invalid |
+| `review/stored-document-moved-after-as_of` | reviewer | blocking `future_source` |
+| `runs/as_of-after-creation` | domain | a run cannot be dated in its own future |
+| `history/earlier-run-unchanged-by-later-data` | history | adding later documents/facts does not change an earlier run's state |
+
+Reproducibility: a frozen, fully offline AAPL run (SEC fixtures, scripted LLM, fixed prices and scenario inputs) is reduced to run-id-independent values (status, snapshot id, snapshot documents, fact-id digest, DCF value, probability-weighted value, normalized report digest, review verdict) and compared with `tests/fixtures/reproducibility/frozen_run.json`. Regeneration of intended changes is documented in `tests/fixtures/reproducibility/README.md`.

@@ -1,0 +1,15 @@
+{
+  "description": "Golden values of the frozen AAPL run (as_of 2024-01-15); see README.md.",
+  "expected": {
+    "dcf_value_per_share": 106.370872,
+    "documents": [
+      "sec_0000320193-23-000106"
+    ],
+    "fact_ids_sha256": "822452812286375b7d5f00c59b1184334c2e0e85b5929a97742a7fad1d826023",
+    "report_sha256": "79d6c87329744cbd8afd3debf10591869524ccde66db19af391f236c77d9da61",
+    "review_passed": true,
+    "scenario_probability_weighted": 105.538593,
+    "snapshot_id": "snap_71e4abb016d72e5be64c0bf427b3269d",
+    "status": "Completed"
+  }
+}

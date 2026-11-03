@@ -733,11 +733,11 @@ Prove ticker → sources → financials → LLM findings → valuation → revie
 
 ## Phase 7: Hardening, CI/CD & Operations
 
-**Status:** `[ ]` Not Started
+**Status:** `[-]` In Progress
 
 ### Task 7.1: Point-in-Time Leakage Audit & Reproducibility Suite
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Add dedicated tests that attempt future-document/data leakage and verify frozen-input reproducibility.
@@ -751,10 +751,10 @@ Add dedicated tests that attempt future-document/data leakage and verify frozen-
 
 **Definition of Done (DoD)**
 
-- [ ] Leakage matrix green; reproducibility fixture documented.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Leakage matrix green; reproducibility fixture documented.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -860,8 +860,8 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 4 — LLM Research Intelligence | 5 | 5 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 5 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 5 |
-| 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **30** |
+| 7 — Hardening, CI/CD & Operations | 5 | 1 |
+| **Total** | **35** | **31** |
 
 ## Change Log
 
@@ -898,3 +898,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-11-03 | Task 6.3 completed and verified |
 | 2026-11-03 | Task 6.4 completed and verified |
 | 2026-11-03 | Task 6.5 completed and verified |
+| 2026-11-03 | Task 7.1 completed and verified |
