@@ -522,7 +522,7 @@ Produce transparent peer tables and selected multiples-based valuation ranges us
 
 ### Task 5.2: DCF / Intrinsic Scenario Engine
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Implement deterministic DCF/scenario model with explicit forecast, WACC/discount and terminal assumptions plus sensitivity tables.
@@ -536,10 +536,10 @@ Implement deterministic DCF/scenario model with explicit forecast, WACC/discount
 
 **Definition of Done (DoD)**
 
-- [ ] Hand-verified DCF fixture passes; all assumptions serializable/versioned.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Hand-verified DCF fixture passes; all assumptions serializable/versioned.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -858,10 +858,10 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2 — Primary-Source Collection & Document Pipeline | 5 | 5 |
 | 3 — Financial Statements & Deterministic Analytics | 5 | 5 |
 | 4 — LLM Research Intelligence | 5 | 5 |
-| 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 1 |
+| 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 2 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 0 |
 | 7 — Hardening, CI/CD & Operations | 5 | 0 |
-| **Total** | **35** | **21** |
+| **Total** | **35** | **22** |
 
 ## Change Log
 
@@ -889,3 +889,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-10-13 | Task 4.4 completed and verified |
 | 2026-10-13 | Task 4.5 completed and verified |
 | 2026-11-03 | Task 5.1 completed and verified |
+| 2026-11-03 | Task 5.2 completed and verified |

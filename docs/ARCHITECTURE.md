@@ -444,3 +444,11 @@ Accepted findings carry the surviving evidence and the issue codes in `attribute
 - `multiples_valuation(target, peers, observations, as_of, peer_set_id)` computes peer-only `summary_stats` and, for each applied multiple, implied per-share values at the peer p25 / median / p75 (`(multiple × target metric − debt + cash) / diluted shares` for EV multiples, `P/E × net income / diluted shares` for P/E). A range is produced only with at least two peer values, a positive target metric and sourced target shares / net-debt inputs; every blocking reason is recorded in `notes` — nothing is imputed, by a model or otherwise.
 - Observations older than 7 days before `as_of`, or more than 7 days apart from the target's, are noted.
 - `to_valuation_run()` persists the full peer/date/input table, the percentiles and outputs as a `ValuationRun` (`method=multiples`) with a content-derived id.
+
+### DCF / intrinsic scenario engine (Task 5.2)
+
+- `domain/valuation.DcfAssumptions` is a versioned, JSON-serializable assumption set (`assumption_set_id`, `version`, `source` = `user:` / `rule:` / `scenario:`, per-year `revenue_growth` and `ebit_margin`, `tax_rate`, `da_pct_revenue`, `capex_pct_revenue`, `nwc_pct_incremental_revenue`, `discount_rate`, `terminal_method` = `gordon` (needs `terminal_growth` < discount rate) or `exit_multiple` (needs `exit_ev_ebitda`), `mid_year`, written `rationale`). Invalid or model-authored sets are rejected at construction.
+- `analytics/dcf.DcfBase` holds the reported starting point (base revenue, debt, cash, diluted shares, period end, `sources`).
+- `run_dcf(base, assumptions)` forecasts revenue → EBIT → NOPAT → FCFF (`nopat + d&a − capex − Δnwc`), discounts with end- or mid-year factors, adds a Gordon or exit-multiple terminal value discounted at the end of year n, and bridges EV → equity → per share. The result keeps the yearly table, PV split and terminal share of EV.
+- `dcf_with_sensitivity()` attaches a per-share grid over discount rate × terminal growth (or exit multiple); economically undefined cells are `None`.
+- `DcfResult.to_valuation_run()` stores inputs with sources, the full assumption set plus its SHA-256 `assumptions_hash`, the forecast table, sensitivity grid and outputs (`method=dcf`, version `1.0.0/dcf-1.0.0`). A DCF value is a scenario output, not a price target.
