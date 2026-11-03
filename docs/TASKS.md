@@ -122,7 +122,7 @@ Update after every verified task.
 ## Phase 7 — Hardening, CI/CD & Operations
 
 - [x] **Task 7.1** — Point-in-Time Leakage Audit & Reproducibility Suite
-- [ ] **Task 7.2** — Observability, Cost Telemetry & Health Checks
+- [x] **Task 7.2** — Observability, Cost Telemetry & Health Checks
 - [ ] **Task 7.3** — Dockerization & Production Configuration
 - [ ] **Task 7.4** — GitHub Actions CI/CD & Release Workflow
 - [ ] **Task 7.5** — Backup, Restore & Operational Runbook
@@ -201,3 +201,5 @@ Record task completion evidence, commands, test counts, and important implementa
 - **Task 6.5** (2026-11-03): ResearchWorkflow (Collecting->Parsing->Analyzing->Valuing->Reviewing) over FilingSource/ReportedFactsSource/MarketDataSource/LLM ports with SEC and static-price adapters, DCF base from reported facts, rule-based thesis skeleton, execute API endpoint and bootstrap wiring; E2E tests: happy path with point-in-time and citation invariants, missing assumptions, source outage, LLM failure, future document, reproducibility. 361 tests passed; ruff + mypy clean.
 
 - **Task 7.1** (2026-11-03): 15-vector leakage matrix across snapshot, SEC index, workflow, mapper, API, market, peers, gate, composer, schema, reviewer, runs and history; frozen offline AAPL run compared against documented golden values (tests/fixtures/reproducibility). Shared E2E setup moved to tests/e2e_support.py. 377 tests passed; ruff + mypy clean.
+
+- **Task 7.2** (2026-11-03): Per-run telemetry (stage timings, LLM tokens/cost from configured prices only, source/parser/finding counters) persisted (schema v7) and exposed; run-scoped log correlation; request correlation middleware + access log; /healthz, /ready (DB schema + data dir, 503 on failure), /health/detailed without secret values; secret-scrubbing tests. 381 tests passed; ruff + mypy clean.

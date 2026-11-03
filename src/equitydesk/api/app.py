@@ -2,17 +2,22 @@
 
 from __future__ import annotations
 
+import logging
+import re
+import time
+from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 
 from equitydesk import __version__
-from equitydesk.application.research_service import ResearchService, ServiceError
+from equitydesk.application.research_service import NotFound, ResearchService, ServiceError
 from equitydesk.application.resolver import ResolutionResult
+from equitydesk.application.telemetry import TelemetryStore
 from equitydesk.application.watchlist import WatchlistService
 from equitydesk.application.workflow import ResearchInputs, ResearchWorkflow
 from equitydesk.domain.common import DomainError
@@ -23,6 +28,7 @@ from equitydesk.domain.metrics import MetricResult
 from equitydesk.domain.research import ResearchRun
 from equitydesk.domain.valuation import ValuationRun
 from equitydesk.domain.watchlist import Alert, WatchlistEntry
+from equitydesk.logging_setup import log_context, new_correlation_id
 
 STATUS_BY_KIND = {"invalid_request": 422, "not_found": 404, "ambiguous": 409}
 
@@ -121,15 +127,37 @@ def _workflow(request: Request) -> ResearchWorkflow:
 Flow = Annotated[ResearchWorkflow, Depends(_workflow)]
 
 
+_CORRELATION = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
+access_log = logging.getLogger("equitydesk.api")
+
+
 def create_app(
     service: ResearchService,
     watchlist: WatchlistService | None = None,
     workflow: ResearchWorkflow | None = None,
+    readiness: Callable[[], dict[str, Any]] | None = None,
+    diagnostics: Callable[[], dict[str, Any]] | None = None,
+    telemetry: TelemetryStore | None = None,
 ) -> FastAPI:
     app = FastAPI(title="EquityDesk Research API", version=__version__)
     app.state.service = service
     app.state.watchlist = watchlist
     app.state.workflow = workflow
+
+    @app.middleware("http")
+    async def correlation(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        incoming = request.headers.get("x-correlation-id", "")
+        cid = incoming if _CORRELATION.match(incoming) else new_correlation_id()
+        start = time.perf_counter()
+        with log_context(correlation_id=cid):
+            response = await call_next(request)
+            access_log.info("request", extra={"method": request.method, "path": request.url.path,
+                                              "status": response.status_code,
+                                              "seconds": round(time.perf_counter() - start, 6)})  # fmt: skip
+        response.headers["X-Correlation-ID"] = cid
+        return response
 
     @app.exception_handler(ServiceError)
     async def _service_error(_: Request, exc: ServiceError) -> JSONResponse:
@@ -154,6 +182,25 @@ def create_app(
     @app.get("/healthz")
     def health() -> dict[str, str]:
         return {"status": "ok", "version": __version__}
+
+    @app.get("/ready", response_model=None)
+    def ready() -> dict[str, Any] | JSONResponse:
+        result = readiness() if readiness is not None else {"ready": True, "checks": {}}
+        return result if result["ready"] else JSONResponse(status_code=503, content=result)
+
+    @app.get("/health/detailed")
+    def detailed() -> dict[str, Any]:
+        info = diagnostics() if diagnostics is not None else {}
+        return {"status": "ok", "version": __version__, "workflow_configured": workflow is not None,
+                "watchlist_configured": watchlist is not None, **info}  # fmt: skip
+
+    @app.get("/research-runs/{run_id}/telemetry")
+    def run_telemetry(s: Svc, run_id: str) -> dict[str, Any]:
+        s.get_run(run_id)
+        data = telemetry.get_telemetry(run_id) if telemetry is not None else None
+        if data is None:
+            raise NotFound(f"no telemetry recorded for run {run_id}")
+        return data
 
     @app.get("/companies/resolve", response_model=ResolutionResponse)
     def resolve(
@@ -268,4 +315,11 @@ def default_app() -> FastAPI:  # pragma: no cover - process entry point
         workflow: ResearchWorkflow | None = build_workflow(container)
     except ValueError:  # e.g. SEC_USER_AGENT missing: read-only API still starts
         workflow = None
-    return create_app(container.research, container.watchlist, workflow)
+    from equitydesk.bootstrap import diagnostics, readiness
+    from equitydesk.logging_setup import configure_logging
+
+    st = container.settings
+    configure_logging(st.log_level, st.log_format, st.secret_values())
+    return create_app(container.research, container.watchlist, workflow,
+                      readiness=lambda: readiness(container), diagnostics=lambda: diagnostics(container),
+                      telemetry=container.repos.telemetry)  # fmt: skip

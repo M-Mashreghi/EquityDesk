@@ -7,6 +7,7 @@ Timestamps in indexed columns are UTC ISO-8601 strings with fixed precision (sor
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
@@ -29,7 +30,7 @@ from equitydesk.domain.snapshot import ResearchSnapshot
 from equitydesk.domain.valuation import ValuationRun
 from equitydesk.domain.watchlist import Alert, WatchlistEntry
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 
 M = TypeVar("M", bound=BaseModel)
 
@@ -188,6 +189,12 @@ CREATE TABLE IF NOT EXISTS alerts (
     payload TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS ix_alerts_company ON alerts(company_id, created_at);
+
+-- v7: operational telemetry per research run (stage timings, LLM tokens/cost, counters).
+CREATE TABLE IF NOT EXISTS run_telemetry (
+    research_run_id TEXT PRIMARY KEY REFERENCES research_runs(research_run_id),
+    payload TEXT NOT NULL
+);
 """
 
 
@@ -834,6 +841,27 @@ class SqliteWatchlistRepository:
         return [Alert.model_validate_json(r["payload"]) for r in self.db.conn.execute(sql, params)]
 
 
+class SqliteTelemetryRepository:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def save_telemetry(self, research_run_id: str, summary: dict[str, Any]) -> None:
+        self.db.conn.execute(
+            "INSERT INTO run_telemetry(research_run_id, payload) VALUES (?, ?) "
+            "ON CONFLICT(research_run_id) DO UPDATE SET payload=excluded.payload",
+            (research_run_id, json.dumps(summary, sort_keys=True, default=str)),
+        )
+
+    def get_telemetry(self, research_run_id: str) -> dict[str, Any] | None:
+        row = self.db.conn.execute(
+            "SELECT payload FROM run_telemetry WHERE research_run_id = ?", (research_run_id,)
+        ).fetchone()
+        if row is None:
+            return None
+        data: dict[str, Any] = json.loads(row["payload"])
+        return data
+
+
 class Repositories:
     """Convenience bundle of all SQLite repositories sharing one connection."""
 
@@ -850,6 +878,7 @@ class Repositories:
         self.peer_sets = SqlitePeerSetRepository(db)
         self.reports = SqliteReportRepository(db)
         self.watchlist = SqliteWatchlistRepository(db)
+        self.telemetry = SqliteTelemetryRepository(db)
 
 
 def open_database(path: Path | str = ":memory:") -> Repositories:

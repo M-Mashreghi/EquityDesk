@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from equitydesk.application.llm import LLMProvider, StructuredLLMClient
 from equitydesk.application.research_service import ResearchService
 from equitydesk.application.resolver import SecurityResolver
+from equitydesk.application.telemetry import TokenPrices
 from equitydesk.application.watchlist import AlertSink, WatchlistService
 from equitydesk.application.workflow import MarketDataSource, ResearchWorkflow
 from equitydesk.config import (
@@ -18,7 +20,7 @@ from equitydesk.config import (
     load_settings,
 )
 from equitydesk.infrastructure.db.raw_store import FilesystemRawStore
-from equitydesk.infrastructure.db.sqlite import Repositories, open_database
+from equitydesk.infrastructure.db.sqlite import SCHEMA_VERSION, Repositories, open_database
 from equitydesk.infrastructure.jobs.alerts import WebhookAlertSink
 from equitydesk.infrastructure.llm.fake import UnavailableLLMProvider
 from equitydesk.infrastructure.market_data.static import StaticMarketData
@@ -61,6 +63,44 @@ def build_container(
         sink = WebhookAlertSink(settings.alert_webhook_url, settings.alert_webhook_token)
     watchlist = WatchlistService(repos.watchlist, service, sink)
     return Container(settings, repos, master, service, watchlist)
+
+
+def readiness(container: Container) -> dict[str, Any]:
+    """Readiness: the database answers with the expected schema and the data dir is writable."""
+    checks: dict[str, dict[str, Any]] = {}
+    try:
+        container.repos.db.conn.execute("SELECT 1").fetchone()
+        version = container.repos.db.schema_version()
+        checks["database"] = {"ok": version == SCHEMA_VERSION, "schema_version": version,
+                              "expected": SCHEMA_VERSION}  # fmt: skip
+    except Exception as exc:
+        checks["database"] = {"ok": False, "error": type(exc).__name__}
+    data_dir = container.settings.data_dir
+    try:
+        data_dir.mkdir(parents=True, exist_ok=True)
+        probe = data_dir / ".ready-probe"
+        probe.write_text("ok", encoding="utf-8")
+        probe.unlink()
+        checks["data_dir"] = {"ok": True}
+    except OSError as exc:
+        checks["data_dir"] = {"ok": False, "error": type(exc).__name__}
+    return {"ready": all(c["ok"] for c in checks.values()), "checks": checks}
+
+
+def diagnostics(container: Container) -> dict[str, Any]:
+    """Component diagnostics without secret values (only whether they are configured)."""
+    s = container.settings
+    return {
+        "env": s.env.value,
+        "schema_version": container.repos.db.schema_version(),
+        "security_master_version": container.master.version,
+        "llm": {"provider": s.llm_provider.value, "model": s.llm_model,
+                "api_key_configured": s.llm_api_key is not None,
+                "cost_tracking": s.llm_cost_input_per_mtok is not None and s.llm_cost_output_per_mtok is not None},
+        "sec": {"user_agent_configured": bool(s.sec_user_agent), "max_rps": s.sec_max_requests_per_second},
+        "alerts": {"webhook_configured": s.alert_webhook_url is not None},
+        "watchlist_entries": len(container.repos.watchlist.list_entries()),
+    }  # fmt: skip
 
 
 def llm_provider(settings: Settings) -> LLMProvider:
@@ -108,4 +148,8 @@ def build_workflow(
         parser=ParserRegistry(),
         llm=llm,
         hook=container.watchlist,
+        telemetry_store=container.repos.telemetry,
+        token_prices=TokenPrices(
+            settings.llm_cost_input_per_mtok, settings.llm_cost_output_per_mtok
+        ),
     )

@@ -10,10 +10,11 @@ in BlockedBySource; unexpected errors mark it Failed with the reason.
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from typing import Protocol
+from typing import Any, Protocol
 
 from equitydesk.analytics.accounting import StatementPeriod, annual_statements, map_reported_facts
 from equitydesk.analytics.dcf import DcfBase, dcf_base_from_statements, dcf_with_sensitivity
@@ -29,6 +30,7 @@ from equitydesk.application.research.quality_gate import EvidenceQualityGate
 from equitydesk.application.research.risks import RiskCatalystExtractor
 from equitydesk.application.research_service import ResearchService
 from equitydesk.application.snapshot import SnapshotBuilder, SnapshotRepository
+from equitydesk.application.telemetry import RunTelemetry, TelemetryStore, TokenPrices
 from equitydesk.domain.common import DomainModel, utc_now
 from equitydesk.domain.companies import Company
 from equitydesk.domain.documents import SourceDocument
@@ -44,10 +46,12 @@ from equitydesk.domain.research import (
     SupportStatus,
 )
 from equitydesk.domain.valuation import DcfAssumptions, ScenarioCase, ScenarioName, ValuationRun
+from equitydesk.logging_setup import log_context
 from equitydesk.reporting.composer import ThesisPoint, compose_report
 from equitydesk.reporting.reviewer import LlmContradictionReviewer, apply_review, review_report
 
 WORKFLOW_VERSION = "1.0.0"
+log = logging.getLogger("equitydesk.workflow")
 
 
 # --- ports ------------------------------------------------------------------------------------
@@ -119,6 +123,7 @@ class RunOutcome:
     notes: list[str] = field(default_factory=list)
     report_id: str | None = None
     review_passed: bool | None = None
+    telemetry: dict[str, Any] = field(default_factory=dict)
 
 
 class NeedsInput(Exception):
@@ -145,6 +150,8 @@ class ResearchWorkflow:
     llm: StructuredLLMClient
     llm_review: bool = True
     hook: RunHook | None = None
+    telemetry_store: TelemetryStore | None = None
+    token_prices: TokenPrices = field(default_factory=TokenPrices)
     clock: Callable[[], datetime] = field(default=utc_now)
 
     def execute(self, research_run_id: str, inputs: ResearchInputs | None = None) -> RunOutcome:
@@ -153,14 +160,29 @@ class ResearchWorkflow:
         if run.status is not ResearchStatus.CREATED:
             raise ValueError(f"run {research_run_id} is {run.status}; only Created runs execute")
         outcome = RunOutcome(run)
-        try:
-            self._pipeline(outcome, inputs)
-        except BlockedBySource as exc:
-            self._move(outcome, ResearchStatus.BLOCKED_BY_SOURCE, str(exc))
-        except NeedsInput as exc:
-            self._move(outcome, ResearchStatus.NEEDS_INPUT, str(exc))
-        except Exception as exc:  # any unexpected failure is recorded on the run, never hidden
-            self._move(outcome, ResearchStatus.FAILED, f"{type(exc).__name__}: {exc}")
+        telemetry = RunTelemetry(research_run_id, self.token_prices)
+        self._telemetry = telemetry
+        previous_observer = self.llm.observer
+        self.llm.observer = telemetry.record_llm
+        with log_context(research_run_id=research_run_id):
+            log.info("research run started", extra={"as_of": run.as_of.isoformat()})
+            try:
+                self._pipeline(outcome, inputs)
+            except BlockedBySource as exc:
+                self._move(outcome, ResearchStatus.BLOCKED_BY_SOURCE, str(exc))
+            except NeedsInput as exc:
+                self._move(outcome, ResearchStatus.NEEDS_INPUT, str(exc))
+            except Exception as exc:  # any unexpected failure is recorded on the run, never hidden
+                log.exception("research run failed")
+                self._move(outcome, ResearchStatus.FAILED, f"{type(exc).__name__}: {exc}")
+            finally:
+                self.llm.observer = previous_observer
+            telemetry.close(outcome.run.status.value)
+            outcome.telemetry = telemetry.summary()
+            if self.telemetry_store is not None:
+                self.telemetry_store.save_telemetry(research_run_id, outcome.telemetry)
+            log.info("research run finished", extra={"status": outcome.run.status.value,
+                                                     "seconds": outcome.telemetry["total_seconds"]})  # fmt: skip
         if self.hook is not None and outcome.run.status in (
             ResearchStatus.COMPLETED,
             ResearchStatus.NEEDS_INPUT,
@@ -175,6 +197,11 @@ class ResearchWorkflow:
             run = run.model_copy(update=updates)
         self.service.runs.update_run(run)
         outcome.run = run
+        if not run.is_terminal and status not in (
+            ResearchStatus.NEEDS_INPUT,
+            ResearchStatus.BLOCKED_BY_SOURCE,
+        ):
+            self._telemetry.enter(status.value)
 
     def _pipeline(self, outcome: RunOutcome, inputs: ResearchInputs) -> None:
         svc = self.service
@@ -185,6 +212,8 @@ class ResearchWorkflow:
         self._move(outcome, ResearchStatus.COLLECTING)
         collected = self.filings.collect(company, run.as_of)
         outcome.notes += [f"collection: {x}" for x in collected.failures]
+        self._telemetry.count("documents_collected", len(collected.documents))
+        self._telemetry.count("collection_failures", len(collected.failures))
         leaked = [d.document_id for d, _ in collected.documents if d.published_at > run.as_of]
         if leaked:
             raise FutureLeakageError(run.as_of, leaked)
@@ -213,12 +242,14 @@ class ResearchWorkflow:
                 content = ingest.load_content(doc)
                 parsed = self.parser.parse(doc.document_id, content, doc.mime_type)
             except Exception as exc:
+                self._telemetry.count("parse_failures")
                 outcome.notes.append(
                     f"parse: {doc.document_id} skipped ({type(exc).__name__}: {exc})"
                 )
                 continue
             self.normalized.add_normalized(parsed)
             normalized[doc.document_id] = parsed
+            self._telemetry.count("documents_parsed")
         if not normalized:
             raise RuntimeError("no snapshot document could be parsed")
 
@@ -227,6 +258,8 @@ class ResearchWorkflow:
         raw = self.reported_facts.reported_facts(company)
         mapped = map_reported_facts(run.company_id, raw, run.as_of)
         svc.facts.add_facts(mapped.facts)
+        self._telemetry.count("facts_mapped", len(mapped.facts))
+        self._telemetry.count("fact_mapping_issues", len(mapped.issues))
         statements = annual_statements(mapped.facts)
         metrics = compute_kpis(run.company_id, statements)
 
@@ -253,6 +286,8 @@ class ResearchWorkflow:
             f"quality gate rejected {i.finding_id}: {i.code.value}" for i in gate.blocking
         ]
         svc.findings.add_findings(gate.accepted)
+        self._telemetry.count("findings_accepted", len(gate.accepted))
+        self._telemetry.count("findings_rejected", len(gate.rejected))
         models = {f.model_version for f in gate.accepted if f.model_version}
         prompts = {f.category.value: f.prompt_version for f in candidates if f.prompt_version}
 
@@ -336,6 +371,7 @@ class ResearchWorkflow:
 
         for v in valuations:
             self.service.valuations.add_valuation(v)
+        self._telemetry.count("valuations", len(valuations))
         return valuations
 
 

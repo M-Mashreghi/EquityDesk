@@ -178,8 +178,22 @@ class StructuredLLMClient:
         self.timeout_seconds = timeout_seconds
         self.backoff_seconds = backoff_seconds
         self.sleep = sleep
+        # Optional telemetry hook, called with every final result (success or failure).
+        self.observer: Callable[[StructuredResult[Any]], None] | None = None
 
     def generate[T: BaseModel](
+        self,
+        prompt: PromptTemplate,
+        variables: Mapping[str, str],
+        schema: type[T],
+        schema_version: str,
+    ) -> StructuredResult[T]:
+        result = self._generate(prompt, variables, schema, schema_version)
+        if self.observer is not None:
+            self.observer(result)
+        return result
+
+    def _generate[T: BaseModel](
         self,
         prompt: PromptTemplate,
         variables: Mapping[str, str],

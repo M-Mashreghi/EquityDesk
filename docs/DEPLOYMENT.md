@@ -32,6 +32,8 @@ Settings are loaded by `equitydesk.config.load_settings()` from an optional `.en
 | `LLM_API_KEY` | — | secret; required for a real provider |
 | `LLM_TIMEOUT_SECONDS` | `60` | |
 | `LLM_MAX_RETRIES` | `2` | bounded retries for timeouts / schema failures |
+| `LLM_COST_INPUT_PER_MTOK` | — | USD per million input tokens, cost telemetry only |
+| `LLM_COST_OUTPUT_PER_MTOK` | — | USD per million output tokens, cost telemetry only |
 | `ALERT_WEBHOOK_URL` | — | secret; optional alert hook |
 | `ALERT_WEBHOOK_TOKEN` | — | secret; optional alert hook |
 | `EQUITYDESK_API_URL` | `http://localhost:8000` | dashboard only: base URL of the research API |

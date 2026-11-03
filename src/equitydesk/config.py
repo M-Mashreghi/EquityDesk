@@ -55,6 +55,8 @@ ENV_KEYS: dict[str, str] = {
     "ALERT_WEBHOOK_TOKEN": "alert_webhook_token",
     "EQUITYDESK_API_URL": "api_url",
     "EQUITYDESK_SCHEDULER_TICK_SECONDS": "scheduler_tick_seconds",
+    "LLM_COST_INPUT_PER_MTOK": "llm_cost_input_per_mtok",
+    "LLM_COST_OUTPUT_PER_MTOK": "llm_cost_output_per_mtok",
 }
 
 
@@ -77,6 +79,9 @@ class Settings(BaseModel):
     llm_api_key: SecretStr | None = None
     llm_timeout_seconds: float = Field(default=60.0, gt=0, le=600)
     llm_max_retries: int = Field(default=2, ge=0, le=10)
+    # USD per million tokens, for run cost telemetry; leave unset if unknown (cost not computed).
+    llm_cost_input_per_mtok: float | None = Field(default=None, ge=0)
+    llm_cost_output_per_mtok: float | None = Field(default=None, ge=0)
 
     alert_webhook_url: SecretStr | None = None
     alert_webhook_token: SecretStr | None = None

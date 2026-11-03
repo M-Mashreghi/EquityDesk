@@ -760,7 +760,7 @@ Add dedicated tests that attempt future-document/data leakage and verify frozen-
 
 ### Task 7.2: Observability, Cost Telemetry & Health Checks
 
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 
 **Business Value / User Story**  
 Add structured logs, stage timing, LLM token/cost metadata, source/parser metrics, and liveness/readiness.
@@ -774,10 +774,10 @@ Add structured logs, stage timing, LLM token/cost metadata, source/parser metric
 
 **Definition of Done (DoD)**
 
-- [ ] Secrets scrubbed; health endpoints/tests green; run correlation works.
-- [ ] Relevant unit/integration tests are green.
-- [ ] No unrelated refactor or unsupported dependency was introduced.
-- [ ] `TASKS.md` and this SSOT are updated only after verification.
+- [x] Secrets scrubbed; health endpoints/tests green; run correlation works.
+- [x] Relevant unit/integration tests are green.
+- [x] No unrelated refactor or unsupported dependency was introduced.
+- [x] `TASKS.md` and this SSOT are updated only after verification.
 
 ---
 
@@ -860,8 +860,8 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 4 — LLM Research Intelligence | 5 | 5 |
 | 5 — Valuation, Scenarios, Thesis & Report Review | 5 | 5 |
 | 6 — API, Dashboard & Research Workflow Automation | 5 | 5 |
-| 7 — Hardening, CI/CD & Operations | 5 | 1 |
-| **Total** | **35** | **31** |
+| 7 — Hardening, CI/CD & Operations | 5 | 2 |
+| **Total** | **35** | **32** |
 
 ## Change Log
 
@@ -899,3 +899,4 @@ Back up SQLite/research metadata, document raw-cache policy, restore drill, prov
 | 2026-11-03 | Task 6.4 completed and verified |
 | 2026-11-03 | Task 6.5 completed and verified |
 | 2026-11-03 | Task 7.1 completed and verified |
+| 2026-11-03 | Task 7.2 completed and verified |
